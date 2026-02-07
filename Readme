@@ -1,4 +1,5 @@
 haiiiiiiii
+(hye to you too!)
 
 this is what are required in our project
 
@@ -8,6 +9,9 @@ frontend:
 
 backend:
 - firebase as backend service
+- will use firestore (database)
+- will use Authentication (email and password → auto create id for every collection for user)
+- API for AI to create responses on the message
 
 ml/ai:
 - adk or tensorflow (what you want to use)

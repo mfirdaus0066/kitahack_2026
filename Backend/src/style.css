@@ -1,0 +1,41 @@
+body{
+    background-color: beige;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+button{
+    background-color: antiquewhite; 
+    padding: 10px;
+    margin: 5px;
+    border-radius: 10px;
+    border: 1px solid black;
+    transition: transform 0.5s ease, background-color 0.5s ease, color 0.5s ease;
+}
+
+button:hover{
+    background-color: rgb(101, 67, 27);
+    color: white;
+    animation: ease-in-out;
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
+#header{
+    text-align: center;
+    font-weight: 300;
+}
+
+.authform, .info-container{
+    background-color: bisque;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+#email, #password{
+    padding: 5px;
+    margin: 5px;
+    border-radius: 10px;
+    border: 1px solid black;
+}

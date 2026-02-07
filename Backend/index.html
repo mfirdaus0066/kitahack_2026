@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+    <head>
+        <title>Arnima</title>
+    </head>
+    <body>
+        <script type = "module" src = "./src/main.js"></script>
+        <h1 id = "header">Welcome to Arnima</h1>
+        <form id="authform">
+            <div class = "authform">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required><br><br>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required><br><br>
+                <div id ="buttons-container">
+                    <button type="submit" id="signin-button">Sign In</button>
+                    <button type="submit" id="signup-button">Sign Up</button>
+                    <button type="submit" id="signout-button">Sign Out</button>
+                </div>
+                <p id="message" style="font-size: 0.8rem; margin-top: 5px;"></p>
+            </div>
+        </form>
+    </body>
+</html>

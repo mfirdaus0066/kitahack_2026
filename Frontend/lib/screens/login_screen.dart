@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
       debugPrint('Login with: ${_usernameController.text}');
       
       // Navigate to home page after successful login
-      Navigator.pushReplacementNamed(context, '/home2');
+      Navigator.pushReplacementNamed(context, '/home');
     }
   }
 

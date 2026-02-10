@@ -49,71 +49,22 @@
         body: SafeArea(
           child: Column(
             children: [
-              // Top decoration row (sun and watering can)
+              // Top decoration row (logo icon)
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.only(top: 10.0, left: 10.0, right: 20.0, bottom: 20.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    // Sun icon
-                    _SunIcon(),
-                    // Watering can icon
-                    _WateringCanIcon(),
+                    // Logo icon
+                    _LogoIcon(),
                   ],
                 ),
               ),
 
               const Spacer(flex: 1),
 
-              // Speech bubble text input
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFABCBBA),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    children: [
-                      TextField(
-                        controller: _textController,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Color(0xFF5A7C5A),
-                          fontSize: 14,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'tell me about your day',
-                          hintStyle: const TextStyle(
-                            color: Color(0xFF5A7C5A),
-                            fontSize: 14,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 16,
-                          ),
-                        ),
-                        maxLines: 3,
-                        minLines: 1,
-                      ),
-                      // Speech bubble pointer
-                      CustomPaint(
-                        size: const Size(40, 20),
-                        painter: _SpeechBubblePointer(),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const Spacer(flex: 2),
-
-              // Plant illustration
-              // _PlantIllustration(),
-              // Plant illustration (image)
               SizedBox(
-                width: 200,   // adjust size to match your UI
+                width: 200,
                 height: 300,
                 child: Image.asset(
                   'assets/icons/user_icon.png',
@@ -167,55 +118,19 @@
     }
   }
 
-  // Sun icon widget
-  class _SunIcon extends StatelessWidget {
+  // Logo icon widget
+  class _LogoIcon extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
       return SizedBox(
         width: 60,
         height: 60,
         child: Image.asset(
-          'assets/icons/sun_icon.png',
+          'assets/images/logo.png',
           fit: BoxFit.contain,
         ),
       );
     }
-  }
-
-  // Watering can icon widget
-  class _WateringCanIcon extends StatelessWidget {
-    @override
-    Widget build(BuildContext context) {
-      return SizedBox(
-        width: 60,
-        height: 60,
-        child: Image.asset(
-          'assets/icons/wateringCan_icon.png',
-          fit: BoxFit.contain,
-        ),
-      );
-    }
-  }
-
-  // Speech bubble pointer painter
-  class _SpeechBubblePointer extends CustomPainter {
-    @override
-    void paint(Canvas canvas, Size size) {
-      final paint = Paint()
-        ..color = const Color(0xFFABCBBA)
-        ..style = PaintingStyle.fill;
-
-      final path = Path()
-        ..moveTo(size.width / 2 - 10, 0)
-        ..lineTo(size.width / 2, size.height)
-        ..lineTo(size.width / 2 + 10, 0)
-        ..close();
-
-      canvas.drawPath(path, paint);
-    }
-
-    @override
-    bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
   }
 
   // Navigation bar item

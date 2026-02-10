@@ -6,10 +6,13 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
+  deleteUser,
 } from "firebase/auth";
 import {
   getFirestore,
   collection,
+  setDoc,
+  getDoc,
   addDoc,
   onSnapshot,
   query,
@@ -36,13 +39,16 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// DOM
+// DOM (get by form instead of individual ID)
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const signinButton = document.getElementById("signin-button");
 const signupButton = document.getElementById("signup-button");
 const signoutButton = document.getElementById("signout-button");
 const message = document.getElementById("message");
+const infoForm = document.getElementById("infoform");
+const submitButton = document.getElementById("submit-button");
+const deleteButton = document.getElementById("delete-button");
 
 // Sign Up Logic
 const signUp = async (email, password) => {
@@ -156,3 +162,75 @@ signoutButton.addEventListener('click', async (e) => {
         message.innerText = "Sign out failed. Please try again.";
     }
 });
+
+// Delete User Event Listener
+
+deleteButton.addEventListener('click', async (e) => {
+    e.preventDefault();
+    
+    const user = auth.currentUser;
+
+    const confirmation = confirm("Are you sure you want to delete your account?");
+    if (!confirmation) return;
+    
+    try{
+        if (user){
+            try{
+                await deleteDoc(doc(db, 'users', user.uid));
+                await deleteUser(user);
+                console.log("Your account has been deleted");
+            }catch(error){
+                console.error("Error deleting user:", error);
+            }
+        }
+    }catch (error){
+        console.log("Nak delete sapa woi");
+        console.error("Error deleting user:", error);
+    }
+})
+
+
+// Add to firebase while validating user
+onAuthStateChanged(auth, async (user) => {
+    if (user){
+        const userRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userRef);
+        if (!userDoc.exists()){
+            await setDoc(userRef, {
+                name: "",
+                phone: "",
+                address: ""
+            });
+        }
+    }else{
+        console.log("User is not signed in!");
+    }
+})
+
+// listen to click on Submit button
+submitButton.addEventListener('click', async (e) => {
+    e.preventDefault();
+
+    try{
+        const user = auth.currentUser;
+
+        if (!user.auth){
+            console.log("User is not signed in!");
+            return;
+        }
+
+        const name = infoForm.name.value;
+        const phone = infoForm.phone.value;
+        const address = infoForm.address.value;
+
+        await setDoc(doc(db, "users", user.uid), {
+            name: name,
+            phone: phone,
+            address: address
+        });
+
+        console.log('Data successfully added!');
+    }catch(error){
+        console.error("Error adding document:", error);
+    }
+})

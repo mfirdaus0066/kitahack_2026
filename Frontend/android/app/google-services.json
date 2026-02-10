@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "119158268317",
+    "project_id": "arnima-8ab2f",
+    "storage_bucket": "arnima-8ab2f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:119158268317:android:5c54d0929119479eaa8f74",
+        "android_client_info": {
+          "package_name": "com.example.arnima"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBR70uUEKW4Dj1KpdsczOSrh7EVyxl2QuI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

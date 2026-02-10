@@ -25,14 +25,19 @@
       // Handle navigation based on selected index
       switch (index) {
         case 0:
-          // Navigate to ideas/planner screen
-          Navigator.pushNamed(context, '/home');
+          // Navigate to garden screen
+          Navigator.pushNamed(context, '/garden');
           break;
         case 1:
           // Already on home screen
           break;
         case 2:
-          // Navigate to info/profile screen
+          // Navigate to info screen
+          Navigator.pushNamed(context, '/info');
+          break;
+        case 3:
+          // Navigate to user screen
+          Navigator.pushNamed(context, '/user');
           break;
       }
     }
@@ -111,7 +116,7 @@
                 width: 200,   // adjust size to match your UI
                 height: 300,
                 child: Image.asset(
-                  'assets/icons/plant_sample.png',
+                  'assets/images/plant_sample.png',
                   fit: BoxFit.contain,
                 ),
               ),
@@ -148,6 +153,11 @@
                   imagePath: 'assets/icons/info_icon.png',
                   isSelected: _selectedIndex == 2,
                   onTap: () => _onNavItemTapped(2),
+                ),
+                _NavBarItem(
+                  imagePath: 'assets/icons/user_icon.png',
+                  isSelected: _selectedIndex == 3,
+                  onTap: () => _onNavItemTapped(3),
                 ),
               ],
             ),
@@ -209,246 +219,248 @@
   }
 
   // Plant illustration widget
-  class _PlantIllustration extends StatelessWidget {
-    @override
-    Widget build(BuildContext context) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Plant leaves
-          SizedBox(
-            width: 150,
-            height: 180,
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                // Back leaves
-                Positioned(
-                  bottom: 0,
-                  child: _Leaf(
-                    width: 50,
-                    height: 120,
-                    color: const Color(0xFF81C784),
-                  ),
-                ),
-                // Middle back leaves
-                Positioned(
-                  bottom: 20,
-                  left: 30,
-                  child: Transform.rotate(
-                    angle: -0.2,
-                    child: _Leaf(
-                      width: 45,
-                      height: 110,
-                      color: const Color(0xFF81C784),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 20,
-                  right: 30,
-                  child: Transform.rotate(
-                    angle: 0.2,
-                    child: _Leaf(
-                      width: 45,
-                      height: 110,
-                      color: const Color(0xFF81C784),
-                    ),
-                  ),
-                ),
-                // Front middle leaves
-                Positioned(
-                  bottom: 10,
-                  left: 20,
-                  child: Transform.rotate(
-                    angle: -0.3,
-                    child: _Leaf(
-                      width: 48,
-                      height: 115,
-                      color: const Color(0xFF9CCC65),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 10,
-                  right: 20,
-                  child: Transform.rotate(
-                    angle: 0.3,
-                    child: _Leaf(
-                      width: 48,
-                      height: 115,
-                      color: const Color(0xFF9CCC65),
-                    ),
-                  ),
-                ),
-                // Front center leaf
-                Positioned(
-                  bottom: 5,
-                  child: _Leaf(
-                    width: 52,
-                    height: 125,
-                    color: const Color(0xFFAED581),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Pot
-          Container(
-            width: 120,
-            height: 60,
-            decoration: BoxDecoration(
-              color: const Color(0xFFD2936F),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(8),
-                bottomRight: Radius.circular(8),
-              ),
-            ),
-            child: CustomPaint(
-              painter: _PotPainter(),
-            ),
-          ),
-          const SizedBox(height: 20),
-          // Table
-          _TableWidget(),
-        ],
-      );
-    }
-  }
+  // Not needed now, using image instead
 
-  // Leaf widget
-  class _Leaf extends StatelessWidget {
-    final double width;
-    final double height;
-    final Color color;
+  // class _PlantIllustration extends StatelessWidget {
+  //   @override
+  //   Widget build(BuildContext context) {
+  //     return Column(
+  //       mainAxisSize: MainAxisSize.min,
+  //       children: [
+  //         // Plant leaves
+  //         SizedBox(
+  //           width: 150,
+  //           height: 180,
+  //           child: Stack(
+  //             alignment: Alignment.bottomCenter,
+  //             children: [
+  //               // Back leaves
+  //               Positioned(
+  //                 bottom: 0,
+  //                 child: _Leaf(
+  //                   width: 50,
+  //                   height: 120,
+  //                   color: const Color(0xFF81C784),
+  //                 ),
+  //               ),
+  //               // Middle back leaves
+  //               Positioned(
+  //                 bottom: 20,
+  //                 left: 30,
+  //                 child: Transform.rotate(
+  //                   angle: -0.2,
+  //                   child: _Leaf(
+  //                     width: 45,
+  //                     height: 110,
+  //                     color: const Color(0xFF81C784),
+  //                   ),
+  //                 ),
+  //               ),
+  //               Positioned(
+  //                 bottom: 20,
+  //                 right: 30,
+  //                 child: Transform.rotate(
+  //                   angle: 0.2,
+  //                   child: _Leaf(
+  //                     width: 45,
+  //                     height: 110,
+  //                     color: const Color(0xFF81C784),
+  //                   ),
+  //                 ),
+  //               ),
+  //               // Front middle leaves
+  //               Positioned(
+  //                 bottom: 10,
+  //                 left: 20,
+  //                 child: Transform.rotate(
+  //                   angle: -0.3,
+  //                   child: _Leaf(
+  //                     width: 48,
+  //                     height: 115,
+  //                     color: const Color(0xFF9CCC65),
+  //                   ),
+  //                 ),
+  //               ),
+  //               Positioned(
+  //                 bottom: 10,
+  //                 right: 20,
+  //                 child: Transform.rotate(
+  //                   angle: 0.3,
+  //                   child: _Leaf(
+  //                     width: 48,
+  //                     height: 115,
+  //                     color: const Color(0xFF9CCC65),
+  //                   ),
+  //                 ),
+  //               ),
+  //               // Front center leaf
+  //               Positioned(
+  //                 bottom: 5,
+  //                 child: _Leaf(
+  //                   width: 52,
+  //                   height: 125,
+  //                   color: const Color(0xFFAED581),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //         // Pot
+  //         Container(
+  //           width: 120,
+  //           height: 60,
+  //           decoration: BoxDecoration(
+  //             color: const Color(0xFFD2936F),
+  //             borderRadius: const BorderRadius.only(
+  //               bottomLeft: Radius.circular(8),
+  //               bottomRight: Radius.circular(8),
+  //             ),
+  //           ),
+  //           child: CustomPaint(
+  //             painter: _PotPainter(),
+  //           ),
+  //         ),
+  //         const SizedBox(height: 20),
+  //         // Table
+  //         _TableWidget(),
+  //       ],
+  //     );
+  //   }
+  // }
 
-    const _Leaf({
-      required this.width,
-      required this.height,
-      required this.color,
-    });
+  // // Leaf widget
+  // class _Leaf extends StatelessWidget {
+  //   final double width;
+  //   final double height;
+  //   final Color color;
 
-    @override
-    Widget build(BuildContext context) {
-      return CustomPaint(
-        size: Size(width, height),
-        painter: _LeafPainter(color),
-      );
-    }
-  }
+  //   const _Leaf({
+  //     required this.width,
+  //     required this.height,
+  //     required this.color,
+  //   });
 
-  class _LeafPainter extends CustomPainter {
-    final Color color;
+  //   @override
+  //   Widget build(BuildContext context) {
+  //     return CustomPaint(
+  //       size: Size(width, height),
+  //       painter: _LeafPainter(color),
+  //     );
+  //   }
+  // }
 
-    _LeafPainter(this.color);
+  // class _LeafPainter extends CustomPainter {
+  //   final Color color;
 
-    @override
-    void paint(Canvas canvas, Size size) {
-      final paint = Paint()
-        ..color = color
-        ..style = PaintingStyle.fill;
+  //   _LeafPainter(this.color);
 
-      final path = Path()
-        ..moveTo(size.width / 2, size.height)
-        ..quadraticBezierTo(0, size.height * 0.6, size.width / 2, 0)
-        ..quadraticBezierTo(size.width, size.height * 0.6, size.width / 2, size.height)
-        ..close();
+  //   @override
+  //   void paint(Canvas canvas, Size size) {
+  //     final paint = Paint()
+  //       ..color = color
+  //       ..style = PaintingStyle.fill;
 
-      canvas.drawPath(path, paint);
-    }
+  //     final path = Path()
+  //       ..moveTo(size.width / 2, size.height)
+  //       ..quadraticBezierTo(0, size.height * 0.6, size.width / 2, 0)
+  //       ..quadraticBezierTo(size.width, size.height * 0.6, size.width / 2, size.height)
+  //       ..close();
 
-    @override
-    bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-  }
+  //     canvas.drawPath(path, paint);
+  //   }
 
-  // Pot painter
-  class _PotPainter extends CustomPainter {
-    @override
-    void paint(Canvas canvas, Size size) {
-      final paint = Paint()
-        ..color = const Color(0xFFBF8660)
-        ..style = PaintingStyle.fill;
+  //   @override
+  //   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  // }
 
-      // Rim
-      final rimRect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, size.width, 8),
-        const Radius.circular(4),
-      );
-      canvas.drawRRect(rimRect, paint);
-    }
+  // // Pot painter
+  // class _PotPainter extends CustomPainter {
+  //   @override
+  //   void paint(Canvas canvas, Size size) {
+  //     final paint = Paint()
+  //       ..color = const Color(0xFFBF8660)
+  //       ..style = PaintingStyle.fill;
 
-    @override
-    bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-  }
+  //     // Rim
+  //     final rimRect = RRect.fromRectAndRadius(
+  //       Rect.fromLTWH(0, 0, size.width, 8),
+  //       const Radius.circular(4),
+  //     );
+  //     canvas.drawRRect(rimRect, paint);
+  //   }
 
-  // Table widget
-  class _TableWidget extends StatelessWidget {
-    @override
-    Widget build(BuildContext context) {
-      return CustomPaint(
-        size: const Size(250, 120),
-        painter: _TablePainter(),
-      );
-    }
-  }
+  //   @override
+  //   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  // }
 
-  class _TablePainter extends CustomPainter {
-    @override
-    void paint(Canvas canvas, Size size) {
-      final paint = Paint()
-        ..color = const Color(0xFF6D4C41)
-        ..style = PaintingStyle.fill;
+  // // Table widget
+  // class _TableWidget extends StatelessWidget {
+  //   @override
+  //   Widget build(BuildContext context) {
+  //     return CustomPaint(
+  //       size: const Size(250, 120),
+  //       painter: _TablePainter(),
+  //     );
+  //   }
+  // }
 
-      // Table top
-      final tableTop = RRect.fromRectAndRadius(
-        Rect.fromLTWH(30, 0, size.width - 60, 20),
-        const Radius.circular(4),
-      );
-      canvas.drawRRect(tableTop, paint);
+  // class _TablePainter extends CustomPainter {
+  //   @override
+  //   void paint(Canvas canvas, Size size) {
+  //     final paint = Paint()
+  //       ..color = const Color(0xFF6D4C41)
+  //       ..style = PaintingStyle.fill;
 
-      // Inner line on table top
-      paint.color = const Color(0xFF8D6E63);
-      final innerRect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(40, 5, size.width - 80, 10),
-        const Radius.circular(2),
-      );
-      canvas.drawRRect(innerRect, paint);
+  //     // Table top
+  //     final tableTop = RRect.fromRectAndRadius(
+  //       Rect.fromLTWH(30, 0, size.width - 60, 20),
+  //       const Radius.circular(4),
+  //     );
+  //     canvas.drawRRect(tableTop, paint);
 
-      // Legs
-      paint.color = const Color(0xFF5D4037);
-      final legWidth = 12.0;
+  //     // Inner line on table top
+  //     paint.color = const Color(0xFF8D6E63);
+  //     final innerRect = RRect.fromRectAndRadius(
+  //       Rect.fromLTWH(40, 5, size.width - 80, 10),
+  //       const Radius.circular(2),
+  //     );
+  //     canvas.drawRRect(innerRect, paint);
+
+  //     // Legs
+  //     paint.color = const Color(0xFF5D4037);
+  //     final legWidth = 12.0;
       
-      // Left leg
-      final leftLegPath = Path()
-        ..moveTo(50, 20)
-        ..lineTo(30, size.height)
-        ..lineTo(30 + legWidth, size.height)
-        ..lineTo(50 + legWidth, 20)
-        ..close();
-      canvas.drawPath(leftLegPath, paint);
+  //     // Left leg
+  //     final leftLegPath = Path()
+  //       ..moveTo(50, 20)
+  //       ..lineTo(30, size.height)
+  //       ..lineTo(30 + legWidth, size.height)
+  //       ..lineTo(50 + legWidth, 20)
+  //       ..close();
+  //     canvas.drawPath(leftLegPath, paint);
 
-      // Right leg
-      final rightLegPath = Path()
-        ..moveTo(size.width - 50 - legWidth, 20)
-        ..lineTo(size.width - 30 - legWidth, size.height)
-        ..lineTo(size.width - 30, size.height)
-        ..lineTo(size.width - 50, 20)
-        ..close();
-      canvas.drawPath(rightLegPath, paint);
+  //     // Right leg
+  //     final rightLegPath = Path()
+  //       ..moveTo(size.width - 50 - legWidth, 20)
+  //       ..lineTo(size.width - 30 - legWidth, size.height)
+  //       ..lineTo(size.width - 30, size.height)
+  //       ..lineTo(size.width - 50, 20)
+  //       ..close();
+  //     canvas.drawPath(rightLegPath, paint);
 
-      // Cross support
-      paint.strokeWidth = 8;
-      paint.style = PaintingStyle.stroke;
-      canvas.drawLine(
-        Offset(40, size.height - 30),
-        Offset(size.width - 40, size.height - 30),
-        paint,
-      );
-    }
+  //     // Cross support
+  //     paint.strokeWidth = 8;
+  //     paint.style = PaintingStyle.stroke;
+  //     canvas.drawLine(
+  //       Offset(40, size.height - 30),
+  //       Offset(size.width - 40, size.height - 30),
+  //       paint,
+  //     );
+  //   }
 
-    @override
-    bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-  }
+  //   @override
+  //   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  // }
 
   // Navigation bar item
   class _NavBarItem extends StatelessWidget {

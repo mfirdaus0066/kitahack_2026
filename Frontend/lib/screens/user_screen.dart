@@ -1,4 +1,4 @@
-  import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
   class UserScreen extends StatefulWidget {
     const UserScreen({super.key});
@@ -51,7 +51,7 @@
             children: [
               // Top decoration row (logo icon)
               Padding(
-                padding: const EdgeInsets.only(top: 10.0, left: 10.0, right: 20.0, bottom: 20.0),
+                padding: const EdgeInsets.only(top: 10.0, left: 10.0, right: 20.0, bottom: 10.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -61,18 +61,102 @@
                 ),
               ),
 
-              const Spacer(flex: 1),
+              // Profile Card with Flexible to prevent overflow
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD9D9D9),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          // Profile Picture
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(0xFFB8CFAF),
+                            ),
+                            child: ClipOval(
+                              child: Image.asset(
+                                'assets/icons/profile_pic_icon.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
 
-              SizedBox(
-                width: 200,
-                height: 300,
-                child: Image.asset(
-                  'assets/icons/user_icon.png',
-                  fit: BoxFit.contain,
+                          // Profile Name
+                          const Text(
+                            'profile name',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF5A7C5A),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Account Info Section
+                          _SectionTitle(title: 'account info'),
+                          const SizedBox(height: 8),
+                          _MenuItem(
+                            label: 'profile',
+                            onTap: () {
+                              // TODO: Navigate to profile edit
+                              Navigator.pushNamed(context, '/edit_user');
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          _MenuItem(
+                            label: 'email',
+                            onTap: () {
+                              // TODO: Navigate to email settings
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Appearance Section
+                          _SectionTitle(title: 'appearance'),
+                          const SizedBox(height: 8),
+                          _MenuItem(
+                            label: 'theme',
+                            onTap: () {
+                              // TODO: Navigate to theme settings
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Others Section
+                          _SectionTitle(title: 'others'),
+                          const SizedBox(height: 8),
+                          _MenuItem(
+                            label: 'about us',
+                            onTap: () {
+                              // TODO: Navigate to about us
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          _MenuItem(
+                            label: 'sign out',
+                            onTap: () {
+                              // TODO: Implement sign out
+                              Navigator.pushReplacementNamed(context, '/login');
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
-
-              const Spacer(flex: 1),
             ],
           ),
         ),
@@ -128,6 +212,71 @@
         child: Image.asset(
           'assets/images/logo.png',
           fit: BoxFit.contain,
+        ),
+      );
+    }
+  }
+
+  // Section Title widget
+  class _SectionTitle extends StatelessWidget {
+    final String title;
+
+    const _SectionTitle({required this.title});
+
+    @override
+    Widget build(BuildContext context) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 13,
+            color: Color(0xFF666666),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
+    }
+  }
+
+  // Menu Item widget
+  class _MenuItem extends StatelessWidget {
+    final String label;
+    final VoidCallback onTap;
+
+    const _MenuItem({
+      required this.label,
+      required this.onTap,
+    });
+
+    @override
+    Widget build(BuildContext context) {
+      return GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFB8CFAF),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: Color(0xFF5A7C5A),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios,
+                color: Color(0xFF5A7C5A),
+                size: 14,
+              ),
+            ],
+          ),
         ),
       );
     }

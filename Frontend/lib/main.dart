@@ -10,7 +10,6 @@ import 'screens/home_screen.dart';
 import 'screens/edit_user_screen.dart';
 
 void main() async {
-  // TODO: 1. Flutter bindings and Firebase Initialization
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
@@ -27,8 +26,19 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  ThemeMode _themeMode = ThemeMode.light;
+  ThemeMode _themeMode = ThemeMode.system;
 
+  // ✅ Public getter so other files can read the current theme
+  ThemeMode get themeMode => _themeMode;
+
+  // Set to any ThemeMode (system, light, dark)
+  void setTheme(ThemeMode mode) {
+    setState(() {
+      _themeMode = mode;
+    });
+  }
+
+  // Kept for backward compatibility (used in home_screen)
   void toggleTheme() {
     setState(() {
       _themeMode =
@@ -57,8 +67,6 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
       themeMode: _themeMode,
-      // home: MyHomePage(title: "Idea Board"), //You Have to Remove this first
-      // TODO: 2. Change this to Routes
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
@@ -69,10 +77,6 @@ class _MyAppState extends State<MyApp> {
         '/info': (context) => const InfoScreen(),
         '/user': (context) => const UserScreen(),
         '/edit_user': (context) => const EditUserScreen(),
-
-        // not needed now
-        // '/home2': (context) => MyHomePage(title: "Arnima"),
-        // '/add': (context) => AddScreen(),
       },
     );
   }
@@ -89,8 +93,6 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-
-    // Wait 3 seconds then go to login screen
     Future.delayed(const Duration(seconds: 3), () {
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/login');
@@ -105,18 +107,11 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/images/logo.png',
-              width: 200,
-              height: 200,
-            ),
+            Image.asset('assets/images/logo.png', width: 200, height: 200),
             const SizedBox(height: 16),
             const Text(
               'Arnima',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -124,35 +119,3 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
-
-
-// not needed now
-// class MyHomePage extends StatefulWidget {
-//   const MyHomePage({super.key, required this.title});
-//   final String title;
-
-//   @override
-//   State<MyHomePage> createState() => _MyHomePageState();
-// }
-
-// // TODO: 3. The Widget Structure
-// class _MyHomePageState extends State<MyHomePage> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-//         title: Text(widget.title),
-//         centerTitle: true,
-//       ),
-//       body: const IdeaStream(), // replace the place holder with Idea Stream
-//       floatingActionButton: FloatingActionButton(
-//         onPressed: () {
-//           Navigator.pushNamed(context, '/add');
-//         },
-//         tooltip: 'Add Idea',
-//         child: const Icon(Icons.add),
-//       ),
-//     );
-//   }
-// }

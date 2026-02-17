@@ -24,12 +24,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Arnima App',
       theme: ThemeData(
+        fontFamily: 'JejuHallasan',
         colorScheme: ColorScheme.fromSeed(
           seedColor: Color(0xFF20854F),
           brightness: Brightness.light,
         ),
       ),
       darkTheme: ThemeData(
+        fontFamily: 'JejuHallasan',
         colorScheme: ColorScheme.fromSeed(
           seedColor: Color(0xFF20854F),
           brightness: Brightness.dark,

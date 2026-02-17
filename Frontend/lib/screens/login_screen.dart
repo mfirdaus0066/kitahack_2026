@@ -123,12 +123,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(
                             color: const Color(0xFF5A7C5A),
                             fontWeight: FontWeight.w500,
+                            fontFamily: 'Roboto',
                           ),
                           decoration: InputDecoration(
                             hintText: 'Password',
                             hintStyle: TextStyle(
                               color: const Color(0xFF5A7C5A),
                               fontWeight: FontWeight.w500,
+                              fontFamily: 'JejuHallasan',
                             ),
                             filled: true,
                             fillColor: const Color(0xFFB8D88E).withOpacity(0.3),

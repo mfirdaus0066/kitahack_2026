@@ -16,8 +16,25 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  static _MyAppState of(BuildContext context) =>
+      context.findAncestorStateOfType<_MyAppState>()!;
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.light;
+
+  void toggleTheme() {
+    setState(() {
+      _themeMode =
+          _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +52,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: Color(0xFF20854F),
           brightness: Brightness.dark,
+          surface: Color(0xFF1E1E1E),
+          surfaceContainer: Color(0xFF2C2C2C),
         ),
       ),
-      themeMode: ThemeMode.system,
+      themeMode: _themeMode,
       // home: MyHomePage(title: "Idea Board"), //You Have to Remove this first
       // TODO: 2. Change this to Routes
       initialRoute: '/',

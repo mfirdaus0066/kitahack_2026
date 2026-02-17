@@ -1,4 +1,5 @@
-  import 'package:flutter/material.dart';
+  import 'package:arnima/main.dart';
+import 'package:flutter/material.dart';
 
   class HomeScreen extends StatefulWidget {
     const HomeScreen({super.key});
@@ -56,7 +57,12 @@
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // Sun icon
-                    _SunIcon(),
+                    GestureDetector(
+                      onTap:(){
+                        MyApp.of(context).toggleTheme();
+                      },
+                      child: _SunIcon(),
+                    ),
                     // Watering can icon
                     _WateringCanIcon(),
                   ],
@@ -128,7 +134,7 @@
         // Bottom navigation bar
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFD9D9D9),
+            color: Theme.of(context).colorScheme.surfaceContainer,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),

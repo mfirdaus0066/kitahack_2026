@@ -68,7 +68,7 @@
                 padding: const EdgeInsets.all(20),
                 height: MediaQuery.of(context).size.height * 0.6,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD9D9D9),
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Column(
@@ -133,7 +133,7 @@
         // Bottom navigation bar
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFD9D9D9),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),

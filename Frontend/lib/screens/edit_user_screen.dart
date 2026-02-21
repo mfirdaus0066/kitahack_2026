@@ -69,7 +69,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD9D9D9),
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: SingleChildScrollView(
@@ -139,7 +139,6 @@ class _EditUserScreenState extends State<EditUserScreen> {
                               'assets/icons/pencil_icon.png',
                               width: 16,
                               height: 16,
-                              color: Color(0xFF5A7C5A),
                             ),
                           ],
                         ),
@@ -155,12 +154,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                           },
                         ),
                         const SizedBox(height: 8),
-                        _MenuItem(
-                          label: 'sex',
-                          onTap: () {
-                            // TODO: Edit sex functionality
-                          },
-                        ),
+                        const _SexDropdownItem(), // Sex dropdown menu
                         const SizedBox(height: 8),
                         _MenuItem(
                           label: 'date of birth',
@@ -200,7 +194,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
       // Bottom navigation bar
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFD9D9D9),
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
@@ -313,7 +307,6 @@ class _MenuItem extends StatelessWidget {
               iconPath ?? 'assets/icons/pencil_icon.png',
               width: 20,
               height: 20,
-              color: Color(0xFF5A7C5A),
             ),
           ],
         ),
@@ -348,6 +341,109 @@ class _NavBarItem extends StatelessWidget {
           fit: BoxFit.contain,
         ),
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// Sex Dropdown
+// ─────────────────────────────────────────────
+class _SexDropdownItem extends StatefulWidget {
+  const _SexDropdownItem();
+
+  @override
+  State<_SexDropdownItem> createState() => _SexDropdownItemState();
+}
+
+class _SexDropdownItemState extends State<_SexDropdownItem> {
+  bool _isOpen = false;
+  String _selectedSex = '';
+
+  static const _options = ['male', 'female'];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Header row
+        GestureDetector(
+          onTap: () => setState(() => _isOpen = !_isOpen),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFB8CFAF),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _selectedSex.isEmpty ? 'sex' : 'sex: $_selectedSex',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF5A7C5A),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Image.asset(
+                    'assets/icons/pencil_icon.png',
+                    width: 20,
+                    height: 20,
+                  ),
+              ],
+            ),
+          ),
+        ),
+
+        // Options list
+        AnimatedCrossFade(
+          duration: const Duration(milliseconds: 200),
+          crossFadeState: _isOpen
+              ? CrossFadeState.showFirst
+              : CrossFadeState.showSecond,
+          firstChild: Column(
+            children: _options.map((option) {
+              final isSelected = _selectedSex == option;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedSex = option;
+                    _isOpen = false;
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(top: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color(0xFF5A7C5A)
+                        : const Color(0xFFB8CFAF).withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        option,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isSelected
+                              ? Colors.white
+                              : const Color(0xFF5A7C5A),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      if (isSelected)
+                        const Icon(Icons.check, color: Colors.white, size: 16),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          secondChild: const SizedBox.shrink(),
+        ),
+      ],
     );
   }
 }

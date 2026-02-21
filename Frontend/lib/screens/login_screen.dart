@@ -78,7 +78,7 @@ final AuthService _auth = AuthService();
                   constraints: const BoxConstraints(maxWidth: 400),
                   padding: const EdgeInsets.all(32.0),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Form(
@@ -138,12 +138,14 @@ final AuthService _auth = AuthService();
                           style: TextStyle(
                             color: const Color(0xFF5A7C5A),
                             fontWeight: FontWeight.w500,
+                            fontFamily: 'Roboto',
                           ),
                           decoration: InputDecoration(
                             hintText: 'Password',
                             hintStyle: TextStyle(
                               color: const Color(0xFF5A7C5A),
                               fontWeight: FontWeight.w500,
+                              fontFamily: 'JejuHallasan',
                             ),
                             filled: true,
                             fillColor: const Color(0xFFB8D88E).withOpacity(0.3),

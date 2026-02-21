@@ -1,4 +1,6 @@
+import 'package:arnima/services/auth.dart';
 import 'package:flutter/material.dart';
+import 'package:arnima/services/firestore.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -8,24 +10,37 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+final AuthService _auth = AuthService();
+
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _handleLogin() {
+  void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
-      // TODO: Implement login logic
-      debugPrint('Login with: ${_usernameController.text}');
       
-      // Navigate to home page after successful login
-      Navigator.pushReplacementNamed(context, '/home');
+      dynamic result = await _auth.signInWithEmailAndPassword(
+        _emailController.text.trim(), 
+        _passwordController.text.trim());
+      if (result == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not sign in with those credentials'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      } else {
+        await createUserDoc(); // create/check Firestore doc
+        Navigator.pushReplacementNamed(context, '/home');
+        debugPrint('Sign in success for UID: ${result.uid}');
+      }
     }
   }
 
@@ -85,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         // Username Field
                         TextFormField(
-                          controller: _usernameController,
+                          controller: _emailController,
                           style: TextStyle(
                             color: const Color(0xFF5A7C5A),
                             fontWeight: FontWeight.w500,

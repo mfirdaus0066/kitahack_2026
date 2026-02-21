@@ -1,3 +1,4 @@
+import 'package:arnima/services/auth.dart';
 import 'package:flutter/material.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -12,6 +13,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+final AuthService _auth = AuthService();
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -19,13 +22,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  void _handleSignUp() {
+  void _handleSignUp() async {
     if (_formKey.currentState!.validate()) {
-      // TODO: Implement sign up logic
-      debugPrint('Sign up with: ${_emailController.text}');
       
-      // Navigate to home page after successful sign up
-      Navigator.pushReplacementNamed(context, '/home');
+      dynamic result = await _auth.registerWithEmailAndPassword(
+        _emailController.text.trim(), 
+        _passwordController.text.trim());
+      
+      if (result == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not register with those credentials'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      } else {
+        // Note: We don't need Navigator here.
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registeration successful!'),
+            backgroundColor: Color.fromARGB(255, 6, 120, 16),
+          ),
+        );
+        debugPrint('Sign up success for UID: ${result.uid}');
+      }
     }
   }
 
@@ -174,7 +194,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                         const SizedBox(height: 8),
 
-                        // Sign In Button
+                        // Sign Up Button
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(

@@ -1,3 +1,4 @@
+import 'package:arnima/services/auth.dart';
 import 'package:flutter/material.dart';
 
   class UserScreen extends StatefulWidget {
@@ -10,6 +11,8 @@ import 'package:flutter/material.dart';
   class _UserScreenState extends State<UserScreen> {
     final TextEditingController _textController = TextEditingController();
     int _selectedIndex = 3; // For bottom navigation bar
+
+    final AuthService _auth = AuthService();
 
     @override
     void dispose() {
@@ -145,8 +148,9 @@ import 'package:flutter/material.dart';
                           const SizedBox(height: 8),
                           _MenuItem(
                             label: 'sign out',
-                            onTap: () {
-                              // TODO: Implement sign out
+                            onTap: () async {
+                              await _auth.signOut();
+                              debugPrint('Signed out');
                               Navigator.pushReplacementNamed(context, '/login');
                             },
                           ),

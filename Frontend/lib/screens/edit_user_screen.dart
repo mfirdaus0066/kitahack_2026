@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class EditUserScreen extends StatefulWidget {
   const EditUserScreen({super.key});
@@ -348,11 +350,19 @@ class _NavBarItem extends StatelessWidget {
 // ─────────────────────────────────────────────
 // Sex Dropdown
 // ─────────────────────────────────────────────
+Future<void> _saveSex(String sex) async {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  await FirebaseFirestore.instance.collection('users').doc(uid).update({
+    'sex': sex,
+  });
+}
+
 class _SexDropdownItem extends StatefulWidget {
   const _SexDropdownItem();
 
   @override
   State<_SexDropdownItem> createState() => _SexDropdownItemState();
+  
 }
 
 class _SexDropdownItemState extends State<_SexDropdownItem> {
@@ -361,13 +371,29 @@ class _SexDropdownItemState extends State<_SexDropdownItem> {
 
   static const _options = ['male', 'female'];
 
+  // save
+  @override
+  void initState() {
+    super.initState();
+    _loadSex();
+  }
+
+  Future<void> _loadSex() async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    if (doc.exists && doc.data()?['sex'] != null) {
+      setState(() => _selectedSex = doc['sex']);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         // Header row
         GestureDetector(
-          onTap: () => setState(() => _isOpen = !_isOpen),
+          onTap: () async => setState(() => 
+          _isOpen = !_isOpen),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
@@ -405,11 +431,12 @@ class _SexDropdownItemState extends State<_SexDropdownItem> {
             children: _options.map((option) {
               final isSelected = _selectedSex == option;
               return GestureDetector(
-                onTap: () {
+                onTap: () async {
                   setState(() {
                     _selectedSex = option;
                     _isOpen = false;
                   });
+                  await _saveSex(option);
                 },
                 child: Container(
                   margin: const EdgeInsets.only(top: 4),

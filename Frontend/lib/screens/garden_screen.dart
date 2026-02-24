@@ -74,6 +74,8 @@ class _GardenScreenState extends State<GardenScreen> {
                   color: Colors.green,
                 ),
 
+                Positioned(top: 400, right: 20, child: _stone()),
+
                 Positioned(
                   top: 400,
                   left: 20,
@@ -283,6 +285,17 @@ class _emptySpot extends StatelessWidget {
       child: Column(
         children: [topWidget, const SizedBox(height: 5), bottomWidget],
       ),
+    );
+  }
+}
+
+class _stone extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 120,
+      height: 120,
+      child: Image.asset('assets/images/stone.png', fit: BoxFit.contain),
     );
   }
 }

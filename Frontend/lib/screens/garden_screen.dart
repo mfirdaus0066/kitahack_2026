@@ -66,11 +66,28 @@ class _GardenScreenState extends State<GardenScreen> {
             const Spacer(flex: 1),
 
             SizedBox(
-              width: 200,
-              height: 300,
-              child: Image.asset(
-                'assets/icons/add_plant_icon.png',
-                fit: BoxFit.contain,
+              width: 60,
+              height: 60,
+              child: Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(100),
+                    child: Image.asset(
+                      'assets/icons/add_plant_icon.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.asset(
+                      'assets/images/rocks.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ],
               ),
             ),
 

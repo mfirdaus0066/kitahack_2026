@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: () {
                       MyApp.of(context).toggleTheme();
                     },
-                    child: ToggleSunIcon(),
+                    child: _SunIcon(),
                   ),
                   // Watering can icon
                   _WateringCanIcon(),
@@ -174,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 // Sun icon widget
-class ToggleSunIcon extends StatelessWidget {
+class _SunIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(

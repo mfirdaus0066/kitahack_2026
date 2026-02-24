@@ -23,7 +23,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
     setState(() {
       _selectedIndex = index;
     });
-    
+
     // Handle navigation based on selected index
     switch (index) {
       case 0:
@@ -54,7 +54,12 @@ class _EditUserScreenState extends State<EditUserScreen> {
           children: [
             // Top decoration row (logo icon)
             Padding(
-              padding: const EdgeInsets.only(top: 10.0, left: 10.0, right: 20.0, bottom: 10.0),
+              padding: const EdgeInsets.only(
+                top: 10.0,
+                left: 10.0,
+                right: 20.0,
+                bottom: 10.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -67,15 +72,25 @@ class _EditUserScreenState extends State<EditUserScreen> {
             // Profile Card with Flexible to prevent overflow
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 20,
+                ),
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(top:14, left: 24, right: 24, bottom: 24),
+                    padding: const EdgeInsets.only(
+                      top: 14,
+                      left: 24,
+                      right: 24,
+                      bottom: 24,
+                    ),
                     child: Column(
                       children: [
                         // Back button at top left
@@ -83,7 +98,9 @@ class _EditUserScreenState extends State<EditUserScreen> {
                           alignment: Alignment.centerLeft,
                           child: GestureDetector(
                             onTap: () {
-                              Navigator.pop(context); // Go back to previous screen
+                              Navigator.pop(
+                                context,
+                              ); // Go back to previous screen
                             },
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -242,10 +259,7 @@ class _LogoIcon extends StatelessWidget {
     return SizedBox(
       width: 60,
       height: 60,
-      child: Image.asset(
-        'assets/images/logo.png',
-        fit: BoxFit.contain,
-      ),
+      child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
     );
   }
 }
@@ -278,11 +292,7 @@ class _MenuItem extends StatelessWidget {
   final VoidCallback onTap;
   final String? iconPath;
 
-  const _MenuItem({
-    required this.label,
-    required this.onTap,
-    this.iconPath,
-  });
+  const _MenuItem({required this.label, required this.onTap, this.iconPath});
 
   @override
   Widget build(BuildContext context) {
@@ -334,8 +344,8 @@ class _NavBarItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 80,
-        height: 80,
+        width: 55,
+        height: 55,
         padding: const EdgeInsets.all(5),
         child: Image.asset(
           imagePath,
@@ -362,7 +372,6 @@ class _SexDropdownItem extends StatefulWidget {
 
   @override
   State<_SexDropdownItem> createState() => _SexDropdownItemState();
-  
 }
 
 class _SexDropdownItemState extends State<_SexDropdownItem> {
@@ -380,7 +389,10 @@ class _SexDropdownItemState extends State<_SexDropdownItem> {
 
   Future<void> _loadSex() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
-    final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
     if (doc.exists && doc.data()?['sex'] != null) {
       setState(() => _selectedSex = doc['sex']);
     }
@@ -392,8 +404,7 @@ class _SexDropdownItemState extends State<_SexDropdownItem> {
       children: [
         // Header row
         GestureDetector(
-          onTap: () async => setState(() => 
-          _isOpen = !_isOpen),
+          onTap: () async => setState(() => _isOpen = !_isOpen),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
@@ -412,10 +423,10 @@ class _SexDropdownItemState extends State<_SexDropdownItem> {
                   ),
                 ),
                 Image.asset(
-                    'assets/icons/pencil_icon.png',
-                    width: 20,
-                    height: 20,
-                  ),
+                  'assets/icons/pencil_icon.png',
+                  width: 20,
+                  height: 20,
+                ),
               ],
             ),
           ),
@@ -440,7 +451,10 @@ class _SexDropdownItemState extends State<_SexDropdownItem> {
                 },
                 child: Container(
                   margin: const EdgeInsets.only(top: 4),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? const Color(0xFF5A7C5A)

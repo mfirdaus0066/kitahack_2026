@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class GardenScreen extends StatefulWidget {
@@ -65,30 +66,41 @@ class _GardenScreenState extends State<GardenScreen> {
 
             const Spacer(flex: 1),
 
-            SizedBox(
-              width: 60,
-              height: 60,
-              child: Column(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(100),
-                    child: Image.asset(
-                      'assets/icons/add_plant_icon.png',
-                      fit: BoxFit.contain,
-                    ),
-                  ),
+            Stack(
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width * 1.0,
+                  height: MediaQuery.of(context).size.height * 0.75,
+                  color: Colors.green,
+                ),
 
-                  const SizedBox(height: 8),
-
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
-                      'assets/images/rocks.png',
-                      fit: BoxFit.contain,
-                    ),
+                Positioned(
+                  top: 400,
+                  left: 20,
+                  child: _emptySpot(
+                    topWidget: _plantBtn(),
+                    bottomWidget: _rock(),
                   ),
-                ],
-              ),
+                ),
+
+                Positioned(
+                  top: 280,
+                  left: 50,
+                  child: _emptySpot(
+                    topWidget: _plantBtn(),
+                    bottomWidget: _rock(),
+                  ),
+                ),
+
+                Positioned(
+                  top: 160,
+                  left: 35,
+                  child: _emptySpot(
+                    topWidget: _plantBtn(),
+                    bottomWidget: _rock(),
+                  ),
+                ),
+              ],
             ),
 
             const Spacer(flex: 1),
@@ -160,6 +172,63 @@ class _GlovesIcon extends StatelessWidget {
       width: 60,
       height: 60,
       child: Image.asset('assets/icons/gloves_icon.png', fit: BoxFit.contain),
+    );
+  }
+}
+
+class _plantBtn extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 60,
+      height: 60,
+      child: Column(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(100),
+            child: Image.asset(
+              'assets/icons/add_plant_icon.png',
+              height: 60,
+              width: 60,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// rock widget
+class _rock extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 90,
+      height: 30,
+      child: Image.asset('assets/images/garden_rock.png', fit: BoxFit.contain),
+    );
+  }
+}
+
+class _emptySpot extends StatelessWidget {
+  final Widget topWidget;
+  final Widget bottomWidget;
+
+  const _emptySpot({
+    super.key,
+    required this.topWidget,
+    required this.bottomWidget,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 100,
+      height: 100,
+      child: Column(
+        children: [topWidget, const SizedBox(height: 5), bottomWidget],
+      ),
     );
   }
 }

@@ -74,7 +74,19 @@ class _GardenScreenState extends State<GardenScreen> {
                   color: Colors.green,
                 ),
 
-                Positioned(top: 400, right: 20, child: _stone()),
+                //sand divider
+                SizedBox(child: CustomPaint(painter: _sandDivider())),
+
+                //stone for lil buddy
+                Positioned(
+                  top: 400,
+                  right: 0,
+                  child: Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()..scale(-1.0, 1.0),
+                    child: _stone(),
+                  ),
+                ),
 
                 Positioned(
                   top: 400,
@@ -293,11 +305,70 @@ class _stone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 120,
-      height: 120,
+      width: 175,
+      height: 175,
       child: Image.asset('assets/images/stone.png', fit: BoxFit.contain),
     );
   }
+}
+
+class _sandDivider extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFBFA06E)
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+
+    path.moveTo(size.width * 0.7, size.height);
+
+    path.quadraticBezierTo(
+      size.width * 0.5,
+      size.height * 0.2,
+      size.width * 0.45,
+      size.height * 0.4,
+    );
+
+    path.quadraticBezierTo(
+      size.width * 0.35,
+      size.height * 0.6,
+      size.width * 0.5,
+      size.height * 0.8,
+    );
+
+    path.quadraticBezierTo(
+      size.width * 0.6,
+      size.height,
+      size.width * 0.5,
+      size.height,
+    );
+
+    path.lineTo(size.width * 0.4, 0);
+
+    path.quadraticBezierTo(
+      size.width * 0.5,
+      size.height * 0.8,
+      size.width * 0.65,
+      size.height * 0.6,
+    );
+
+    path.quadraticBezierTo(
+      size.width * 0.75,
+      size.height * 0.4,
+      size.width * 0.55,
+      size.height * 0.2,
+    );
+
+    path.quadraticBezierTo(size.width * 0.5, 0, size.width * 0.6, 0);
+
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 // Navigation bar item

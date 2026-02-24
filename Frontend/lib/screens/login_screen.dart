@@ -14,7 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-final AuthService _auth = AuthService();
+  final AuthService _auth = AuthService();
 
   @override
   void dispose() {
@@ -25,10 +25,10 @@ final AuthService _auth = AuthService();
 
   void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
-      
       dynamic result = await _auth.signInWithEmailAndPassword(
-        _emailController.text.trim(), 
-        _passwordController.text.trim());
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
       if (result == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -78,7 +78,9 @@ final AuthService _auth = AuthService();
                   constraints: const BoxConstraints(maxWidth: 400),
                   padding: const EdgeInsets.all(32.0),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Form(
@@ -102,13 +104,13 @@ final AuthService _auth = AuthService();
                         TextFormField(
                           controller: _emailController,
                           style: TextStyle(
-                            color: const Color(0xFF5A7C5A),
+                            color: const Color(0xFFABCBBA),
                             fontWeight: FontWeight.w500,
                           ),
                           decoration: InputDecoration(
                             hintText: 'Username',
                             hintStyle: TextStyle(
-                              color: const Color(0xFF5A7C5A),
+                              color: const Color.fromARGB(255, 128, 159, 143),
                               fontWeight: FontWeight.w500,
                             ),
                             filled: true,
@@ -136,14 +138,14 @@ final AuthService _auth = AuthService();
                           controller: _passwordController,
                           obscureText: true,
                           style: TextStyle(
-                            color: const Color(0xFF5A7C5A),
+                            color: const Color(0xFFABCBBA),
                             fontWeight: FontWeight.w500,
                             fontFamily: 'Roboto',
                           ),
                           decoration: InputDecoration(
                             hintText: 'Password',
                             hintStyle: TextStyle(
-                              color: const Color(0xFF5A7C5A),
+                              color: const Color.fromARGB(255, 128, 159, 143),
                               fontWeight: FontWeight.w500,
                               fontFamily: 'JejuHallasan',
                             ),
@@ -177,7 +179,7 @@ final AuthService _auth = AuthService();
                               'forgot password?',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.black87,
+                                color: Color(0xFF5A7C5A),
                               ),
                             ),
                           ),
@@ -213,7 +215,7 @@ final AuthService _auth = AuthService();
                           'or log in with',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.black54,
+                            color: Color(0xFF5A7C5A),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -248,19 +250,22 @@ final AuthService _auth = AuthService();
                               'not log in yet? ',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.black54,
+                                color: Color(0xFF5A7C5A),
                               ),
                             ),
                             GestureDetector(
                               onTap: () {
                                 // Navigate to sign up screen
-                                Navigator.pushReplacementNamed(context, '/signup');
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  '/signup',
+                                );
                               },
                               child: const Text(
                                 'Sign up',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Color(0xFF5A7C5A),
+                                  color: Color(0xFFABCBBA),
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -284,10 +289,7 @@ class _SocialLoginButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
 
-  const _SocialLoginButton({
-    required this.icon,
-    required this.onPressed,
-  });
+  const _SocialLoginButton({required this.icon, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

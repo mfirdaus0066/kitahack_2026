@@ -482,8 +482,8 @@ class _NavBarItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 80,
-        height: 80,
+        width: 55,
+        height: 55,
         padding: const EdgeInsets.all(5),
         child: Image.asset(
           imagePath,

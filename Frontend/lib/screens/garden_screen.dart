@@ -69,7 +69,7 @@ class _GardenScreenState extends State<GardenScreen> {
               width: 200,
               height: 300,
               child: Image.asset(
-                'assets/icons/garden_icon.png',
+                'assets/icons/add_plant_icon.png',
                 fit: BoxFit.contain,
               ),
             ),

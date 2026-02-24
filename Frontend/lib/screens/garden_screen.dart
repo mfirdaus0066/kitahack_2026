@@ -84,6 +84,15 @@ class _GardenScreenState extends State<GardenScreen> {
                 ),
 
                 Positioned(
+                  top: 400,
+                  left: 130,
+                  child: _emptySpot(
+                    topWidget: _plantBtn(),
+                    bottomWidget: _rock(),
+                  ),
+                ),
+
+                Positioned(
                   top: 280,
                   left: 50,
                   child: _emptySpot(
@@ -93,8 +102,53 @@ class _GardenScreenState extends State<GardenScreen> {
                 ),
 
                 Positioned(
+                  top: 280,
+                  right: 95,
+                  child: _emptySpot(
+                    topWidget: _plantBtn(),
+                    bottomWidget: _rock(),
+                  ),
+                ),
+
+                Positioned(
                   top: 160,
                   left: 35,
+                  child: _emptySpot(
+                    topWidget: _plantBtn(),
+                    bottomWidget: _rock(),
+                  ),
+                ),
+
+                Positioned(
+                  top: 160,
+                  right: 20,
+                  child: _emptySpot(
+                    topWidget: _plantBtn(),
+                    bottomWidget: _rock(),
+                  ),
+                ),
+
+                Positioned(
+                  top: 40,
+                  right: 80,
+                  child: _emptySpot(
+                    topWidget: _plantBtn(),
+                    bottomWidget: _rock(),
+                  ),
+                ),
+
+                Positioned(
+                  top: 100,
+                  left: 140,
+                  child: _emptySpot(
+                    topWidget: _plantBtn(),
+                    bottomWidget: _rock(),
+                  ),
+                ),
+
+                Positioned(
+                  top: 40,
+                  left: 45,
                   child: _emptySpot(
                     topWidget: _plantBtn(),
                     bottomWidget: _rock(),

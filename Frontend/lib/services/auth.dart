@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MyUser {
   final String uid;
@@ -12,6 +13,8 @@ class AuthService {
   return user != null ? MyUser(uid: user.uid) : null;
   }
 
+  User? get currentUser => _auth.currentUser;
+  
   // Sign up logic
   Future <MyUser?> registerWithEmailAndPassword(String email, String password) async {
     try{
@@ -50,6 +53,27 @@ class AuthService {
       await FirebaseAuth.instance.signOut();
     } catch (e) {
       print('Error signing out: $e');
+    }
+  }
+
+  // delete account logic
+  Future<void> deleteAccount(String uid, String email, String password) async {
+    try {
+      // Re-authenticate first
+      AuthCredential credential = EmailAuthProvider.credential(
+        email: email,
+        password: password,
+      );
+      await _auth.currentUser!.reauthenticateWithCredential(credential);
+
+      // Delete Firestore document
+      await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+
+      // Delete auth account
+      await _auth.currentUser!.delete();
+    } catch (e) {
+      print(e.toString());
+      rethrow;
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:arnima/services/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -13,6 +14,8 @@ class _EditUserScreenState extends State<EditUserScreen> {
   final TextEditingController _textController = TextEditingController();
   int _selectedIndex = 3; // For bottom navigation bar
 
+  final AuthService _auth = AuthService();
+  
   @override
   void dispose() {
     _textController.dispose();
@@ -180,7 +183,68 @@ class _EditUserScreenState extends State<EditUserScreen> {
                           label: 'delete account',
                           iconPath: 'assets/icons/delete_account_icon.png',
                           onTap: () {
-                            // TODO: Implement delete account
+                            final passwordController = TextEditingController();
+
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Delete Account'),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text('Please enter your password to confirm. This cannot be undone.'),
+                                    const SizedBox(height: 16),
+                                    TextField(
+                                      controller: passwordController,
+                                      obscureText: true,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Password',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      passwordController.dispose();
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      String password = passwordController.text.trim();
+                                      if (password.isEmpty) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('Please enter your password')),
+                                        );
+                                        return;
+                                      }
+
+                                      final navigator = Navigator.of(context);
+                                      final messenger = ScaffoldMessenger.of(context);
+
+                                      navigator.pop();
+
+                                      try {
+                                        String uid = _auth.currentUser!.uid;
+                                        String email = _auth.currentUser!.email!;
+
+                                        await _auth.deleteAccount(uid, email, password);
+
+                                        navigator.pushNamedAndRemoveUntil('/login', (route) => false);
+                                      } catch (e) {
+                                        messenger.showSnackBar(
+                                          SnackBar(content: Text('Could not delete account!')),
+                                        );
+                                      }
+                                    },
+                                    child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
+                              ),
+                            );
                           },
                         ),
                         const SizedBox(height: 8),

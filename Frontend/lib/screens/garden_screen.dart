@@ -75,7 +75,11 @@ class _GardenScreenState extends State<GardenScreen> {
                 ),
 
                 //sand divider
-                SizedBox(child: CustomPaint(painter: _sandDivider())),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.95,
+                  height: MediaQuery.of(context).size.height * 0.75,
+                  child: CustomPaint(painter: _sandDivider()),
+                ),
 
                 //stone for lil buddy
                 Positioned(
@@ -319,52 +323,99 @@ class _sandDivider extends CustomPainter {
       ..color = const Color(0xFFBFA06E)
       ..style = PaintingStyle.fill;
 
+    final borderPaint = Paint()
+      ..color = const Color.fromARGB(255, 91, 133, 56)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
     final path = Path();
 
-    path.moveTo(size.width * 0.7, size.height);
+    path.moveTo(size.width * 0, size.height * 0);
 
+    // ===== LEFT EDGE =====
     path.quadraticBezierTo(
-      size.width * 0.5,
-      size.height * 0.2,
       size.width * 0.45,
-      size.height * 0.4,
-    );
-
-    path.quadraticBezierTo(
-      size.width * 0.35,
-      size.height * 0.6,
+      size.height * 0.10,
       size.width * 0.5,
-      size.height * 0.8,
+      size.height * 0.20,
     );
 
     path.quadraticBezierTo(
-      size.width * 0.6,
+      size.width * 0.60,
+      size.height * 0.45,
+      size.width * 0.4,
+      size.height * 0.45,
+    );
+
+    path.quadraticBezierTo(
+      size.width * 0.20,
+      size.height * 0.50,
+      size.width * 0.40,
+      size.height * 0.70,
+    );
+
+    path.quadraticBezierTo(
+      size.width * 0.40,
+      size.height * 0.70,
+      size.width * 0.49,
+      size.height * 0.80,
+    );
+
+    path.quadraticBezierTo(
+      size.width * 0.60,
+      size.height * 0.90,
+      size.width * 0.40,
       size.height,
-      size.width * 0.5,
-      size.height,
     );
 
-    path.lineTo(size.width * 0.4, 0);
+    path.lineTo(size.width * 0.6, size.height * 1);
 
+    path.lineTo(size.width * 0.6, size.height * 1.05);
+
+    path.lineTo(size.width * 0.4, size.height * 1.05);
+
+    // ===== RIGHT EDGE =====
     path.quadraticBezierTo(
-      size.width * 0.5,
-      size.height * 0.8,
-      size.width * 0.65,
-      size.height * 0.6,
+      size.width * 0.90,
+      size.height * 0.98,
+      size.width * 0.70,
+      size.height * 0.75,
     );
 
     path.quadraticBezierTo(
-      size.width * 0.75,
-      size.height * 0.4,
       size.width * 0.55,
-      size.height * 0.2,
+      size.height * 0.70,
+      size.width * 0.65,
+      size.height * 0.55,
     );
 
-    path.quadraticBezierTo(size.width * 0.5, 0, size.width * 0.6, 0);
+    path.quadraticBezierTo(
+      size.width * 0.8,
+      size.height * 0.40,
+      size.width * 0.7,
+      size.height * 0.35,
+    );
+
+    path.quadraticBezierTo(
+      size.width * 0.64,
+      size.height * 0.30,
+      size.width * 0.64,
+      size.height * 0.3,
+    );
+
+    path.quadraticBezierTo(
+      size.width * 0.5,
+      size.height * 0.05,
+      size.width * 1,
+      size.height * 0,
+    );
 
     path.close();
 
     canvas.drawPath(path, paint);
+    canvas.drawPath(path, borderPaint);
   }
 
   @override

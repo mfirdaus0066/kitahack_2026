@@ -9,6 +9,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _isExpanded = false;
+  String _lastMessage = '';
   final TextEditingController _textController = TextEditingController();
   int _selectedIndex = 1; // Home is selected by default
 
@@ -46,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xFF20854F), // Green background
       body: SafeArea(
         child: Column(
@@ -74,42 +77,146 @@ class _HomeScreenState extends State<HomeScreen> {
             // Speech bubble text input
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFABCBBA),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _textController,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Color(0xFF5A7C5A),
-                        fontSize: 14,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'tell me about your day',
-                        hintStyle: const TextStyle(
-                          color: Color(0xFF5A7C5A),
-                          fontSize: 14,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 16,
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isExpanded = !_isExpanded;
+                      });
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      height: _isExpanded ? 140 : 70,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFFB8CFAF),
+                          width: 6,
                         ),
                       ),
-                      maxLines: 3,
-                      minLines: 1,
+                      clipBehavior: Clip.hardEdge,
+                      child: _isExpanded
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                // Message display area
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Message text
+                                      Text(
+                                        'How is your day?',
+                                        style: const TextStyle(
+                                          color: Color(0xFF3B5D3B),
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      // "user" label top right
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Text(
+                                          _lastMessage.isNotEmpty ? _lastMessage : 'user',
+                                          style: const TextStyle(
+                                            color: Color(0xFF2F4F3A),
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Input bar
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFA8C3B5),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: TextField(
+                                            controller: _textController,
+                                            style: const TextStyle(
+                                              color: Color(0xFF2F4F3A),
+                                              fontSize: 13,
+                                            ),
+                                            decoration: const InputDecoration(
+                                              hintText: 'user input',
+                                              hintStyle: TextStyle(
+                                                color: Color(0xFF3B5D3B),
+                                                fontSize: 13,
+                                              ),
+                                              border: InputBorder.none,
+                                              contentPadding: EdgeInsets.symmetric(
+                                                horizontal: 16,
+                                                vertical: 12,
+                                              ),
+                                            ),
+                                            onSubmitted: (value) {
+                                              if (value.isNotEmpty) {
+                                                setState(() {
+                                                  _lastMessage = value;
+                                                  _textController.clear();
+                                                });
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                        // Arrow button
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (_textController.text.isNotEmpty) {
+                                              setState(() {
+                                                _lastMessage = _textController.text;
+                                                _textController.clear();
+                                              });
+                                            }
+                                          },
+                                          child: const Padding(
+                                            padding: EdgeInsets.only(right: 20),
+                                            child: Text(
+                                              '>',
+                                              style: TextStyle(
+                                                color: Color(0xFF3B5D3B),
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          // Collapsed state — just show a hint
+                          : const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 70, vertical: 14),
+                              child: Text(
+                                'Tell me about your day',
+                                style: TextStyle(
+                                  color: Color(0xFF3B5D3B),
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
                     ),
-                    // Speech bubble pointer
-                    CustomPaint(
-                      size: const Size(40, 20),
-                      painter: _SpeechBubblePointer(),
+                  ),
+                  // Speech bubble pointer (always visible)
+                  CustomPaint(
+                    size: const Size(40, 20),
+                    painter: _SpeechBubblePointer(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
 
@@ -202,10 +309,13 @@ class _WateringCanIcon extends StatelessWidget {
 
 // Speech bubble pointer painter
 class _SpeechBubblePointer extends CustomPainter {
+  final Color color;
+  const _SpeechBubblePointer({required this.color});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFFABCBBA)
+      ..color = color
       ..style = PaintingStyle.fill;
 
     final path = Path()
@@ -220,250 +330,6 @@ class _SpeechBubblePointer extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-
-// Plant illustration widget
-// Not needed now, using image instead
-
-// class _PlantIllustration extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       mainAxisSize: MainAxisSize.min,
-//       children: [
-//         // Plant leaves
-//         SizedBox(
-//           width: 150,
-//           height: 180,
-//           child: Stack(
-//             alignment: Alignment.bottomCenter,
-//             children: [
-//               // Back leaves
-//               Positioned(
-//                 bottom: 0,
-//                 child: _Leaf(
-//                   width: 50,
-//                   height: 120,
-//                   color: const Color(0xFF81C784),
-//                 ),
-//               ),
-//               // Middle back leaves
-//               Positioned(
-//                 bottom: 20,
-//                 left: 30,
-//                 child: Transform.rotate(
-//                   angle: -0.2,
-//                   child: _Leaf(
-//                     width: 45,
-//                     height: 110,
-//                     color: const Color(0xFF81C784),
-//                   ),
-//                 ),
-//               ),
-//               Positioned(
-//                 bottom: 20,
-//                 right: 30,
-//                 child: Transform.rotate(
-//                   angle: 0.2,
-//                   child: _Leaf(
-//                     width: 45,
-//                     height: 110,
-//                     color: const Color(0xFF81C784),
-//                   ),
-//                 ),
-//               ),
-//               // Front middle leaves
-//               Positioned(
-//                 bottom: 10,
-//                 left: 20,
-//                 child: Transform.rotate(
-//                   angle: -0.3,
-//                   child: _Leaf(
-//                     width: 48,
-//                     height: 115,
-//                     color: const Color(0xFF9CCC65),
-//                   ),
-//                 ),
-//               ),
-//               Positioned(
-//                 bottom: 10,
-//                 right: 20,
-//                 child: Transform.rotate(
-//                   angle: 0.3,
-//                   child: _Leaf(
-//                     width: 48,
-//                     height: 115,
-//                     color: const Color(0xFF9CCC65),
-//                   ),
-//                 ),
-//               ),
-//               // Front center leaf
-//               Positioned(
-//                 bottom: 5,
-//                 child: _Leaf(
-//                   width: 52,
-//                   height: 125,
-//                   color: const Color(0xFFAED581),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//         // Pot
-//         Container(
-//           width: 120,
-//           height: 60,
-//           decoration: BoxDecoration(
-//             color: const Color(0xFFD2936F),
-//             borderRadius: const BorderRadius.only(
-//               bottomLeft: Radius.circular(8),
-//               bottomRight: Radius.circular(8),
-//             ),
-//           ),
-//           child: CustomPaint(
-//             painter: _PotPainter(),
-//           ),
-//         ),
-//         const SizedBox(height: 20),
-//         // Table
-//         _TableWidget(),
-//       ],
-//     );
-//   }
-// }
-
-// // Leaf widget
-// class _Leaf extends StatelessWidget {
-//   final double width;
-//   final double height;
-//   final Color color;
-
-//   const _Leaf({
-//     required this.width,
-//     required this.height,
-//     required this.color,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return CustomPaint(
-//       size: Size(width, height),
-//       painter: _LeafPainter(color),
-//     );
-//   }
-// }
-
-// class _LeafPainter extends CustomPainter {
-//   final Color color;
-
-//   _LeafPainter(this.color);
-
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     final paint = Paint()
-//       ..color = color
-//       ..style = PaintingStyle.fill;
-
-//     final path = Path()
-//       ..moveTo(size.width / 2, size.height)
-//       ..quadraticBezierTo(0, size.height * 0.6, size.width / 2, 0)
-//       ..quadraticBezierTo(size.width, size.height * 0.6, size.width / 2, size.height)
-//       ..close();
-
-//     canvas.drawPath(path, paint);
-//   }
-
-//   @override
-//   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-// }
-
-// // Pot painter
-// class _PotPainter extends CustomPainter {
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     final paint = Paint()
-//       ..color = const Color(0xFFBF8660)
-//       ..style = PaintingStyle.fill;
-
-//     // Rim
-//     final rimRect = RRect.fromRectAndRadius(
-//       Rect.fromLTWH(0, 0, size.width, 8),
-//       const Radius.circular(4),
-//     );
-//     canvas.drawRRect(rimRect, paint);
-//   }
-
-//   @override
-//   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-// }
-
-// // Table widget
-// class _TableWidget extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return CustomPaint(
-//       size: const Size(250, 120),
-//       painter: _TablePainter(),
-//     );
-//   }
-// }
-
-// class _TablePainter extends CustomPainter {
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     final paint = Paint()
-//       ..color = const Color(0xFF6D4C41)
-//       ..style = PaintingStyle.fill;
-
-//     // Table top
-//     final tableTop = RRect.fromRectAndRadius(
-//       Rect.fromLTWH(30, 0, size.width - 60, 20),
-//       const Radius.circular(4),
-//     );
-//     canvas.drawRRect(tableTop, paint);
-
-//     // Inner line on table top
-//     paint.color = const Color(0xFF8D6E63);
-//     final innerRect = RRect.fromRectAndRadius(
-//       Rect.fromLTWH(40, 5, size.width - 80, 10),
-//       const Radius.circular(2),
-//     );
-//     canvas.drawRRect(innerRect, paint);
-
-//     // Legs
-//     paint.color = const Color(0xFF5D4037);
-//     final legWidth = 12.0;
-
-//     // Left leg
-//     final leftLegPath = Path()
-//       ..moveTo(50, 20)
-//       ..lineTo(30, size.height)
-//       ..lineTo(30 + legWidth, size.height)
-//       ..lineTo(50 + legWidth, 20)
-//       ..close();
-//     canvas.drawPath(leftLegPath, paint);
-
-//     // Right leg
-//     final rightLegPath = Path()
-//       ..moveTo(size.width - 50 - legWidth, 20)
-//       ..lineTo(size.width - 30 - legWidth, size.height)
-//       ..lineTo(size.width - 30, size.height)
-//       ..lineTo(size.width - 50, 20)
-//       ..close();
-//     canvas.drawPath(rightLegPath, paint);
-
-//     // Cross support
-//     paint.strokeWidth = 8;
-//     paint.style = PaintingStyle.stroke;
-//     canvas.drawLine(
-//       Offset(40, size.height - 30),
-//       Offset(size.width - 40, size.height - 30),
-//       paint,
-//     );
-//   }
-
-//   @override
-//   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-// }
 
 // Navigation bar item
 class _NavBarItem extends StatelessWidget {

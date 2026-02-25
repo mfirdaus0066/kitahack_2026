@@ -70,7 +70,7 @@ class _GardenScreenState extends State<GardenScreen> {
               children: [
                 Container(
                   width: MediaQuery.of(context).size.width * 1.0,
-                  height: MediaQuery.of(context).size.height * 0.75,
+                  height: MediaQuery.of(context).size.height * 0.76,
                   color: Colors.green,
                 ),
 
@@ -83,8 +83,8 @@ class _GardenScreenState extends State<GardenScreen> {
 
                 //stone for lil buddy
                 Positioned(
-                  top: 400,
-                  right: 0,
+                  top: 500,
+                  right: -10,
                   child: Transform(
                     alignment: Alignment.center,
                     transform: Matrix4.identity()..scale(-1.0, 1.0),
@@ -93,7 +93,16 @@ class _GardenScreenState extends State<GardenScreen> {
                 ),
 
                 Positioned(
-                  top: 400,
+                  top: 490,
+                  left: 75,
+                  child: _emptySpot(
+                    topWidget: _plantBtn(),
+                    bottomWidget: _rock(),
+                  ),
+                ),
+
+                Positioned(
+                  top: 370,
                   left: 20,
                   child: _emptySpot(
                     topWidget: _plantBtn(),
@@ -102,8 +111,8 @@ class _GardenScreenState extends State<GardenScreen> {
                 ),
 
                 Positioned(
-                  top: 400,
-                  left: 130,
+                  top: 250,
+                  left: 5,
                   child: _emptySpot(
                     topWidget: _plantBtn(),
                     bottomWidget: _rock(),
@@ -111,17 +120,8 @@ class _GardenScreenState extends State<GardenScreen> {
                 ),
 
                 Positioned(
-                  top: 280,
-                  left: 50,
-                  child: _emptySpot(
-                    topWidget: _plantBtn(),
-                    bottomWidget: _rock(),
-                  ),
-                ),
-
-                Positioned(
-                  top: 280,
-                  right: 95,
+                  top: 360,
+                  right: 45,
                   child: _emptySpot(
                     topWidget: _plantBtn(),
                     bottomWidget: _rock(),
@@ -130,7 +130,7 @@ class _GardenScreenState extends State<GardenScreen> {
 
                 Positioned(
                   top: 160,
-                  left: 35,
+                  left: 85,
                   child: _emptySpot(
                     topWidget: _plantBtn(),
                     bottomWidget: _rock(),
@@ -138,8 +138,8 @@ class _GardenScreenState extends State<GardenScreen> {
                 ),
 
                 Positioned(
-                  top: 160,
-                  right: 20,
+                  top: 240,
+                  right: 10,
                   child: _emptySpot(
                     topWidget: _plantBtn(),
                     bottomWidget: _rock(),
@@ -147,8 +147,8 @@ class _GardenScreenState extends State<GardenScreen> {
                 ),
 
                 Positioned(
-                  top: 40,
-                  right: 80,
+                  top: 130,
+                  right: 15,
                   child: _emptySpot(
                     topWidget: _plantBtn(),
                     bottomWidget: _rock(),
@@ -156,8 +156,8 @@ class _GardenScreenState extends State<GardenScreen> {
                 ),
 
                 Positioned(
-                  top: 100,
-                  left: 140,
+                  top: 60,
+                  left: 5,
                   child: _emptySpot(
                     topWidget: _plantBtn(),
                     bottomWidget: _rock(),
@@ -165,8 +165,8 @@ class _GardenScreenState extends State<GardenScreen> {
                 ),
 
                 Positioned(
-                  top: 40,
-                  left: 45,
+                  top: 20,
+                  right: 10,
                   child: _emptySpot(
                     topWidget: _plantBtn(),
                     bottomWidget: _rock(),
@@ -320,7 +320,7 @@ class _sandDivider extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFFBFA06E)
+      ..color = const Color.fromARGB(255, 225, 205, 173)
       ..style = PaintingStyle.fill;
 
     final borderPaint = Paint()
@@ -370,11 +370,11 @@ class _sandDivider extends CustomPainter {
       size.height,
     );
 
-    path.lineTo(size.width * 0.6, size.height * 1);
+    path.lineTo(size.width * 0.6, size.height * 1.6);
 
-    path.lineTo(size.width * 0.6, size.height * 1.05);
+    path.lineTo(size.width * 0.6, size.height * 1.1);
 
-    path.lineTo(size.width * 0.4, size.height * 1.05);
+    path.lineTo(size.width * 0.4, size.height * 1.1);
 
     // ===== RIGHT EDGE =====
     path.quadraticBezierTo(
@@ -415,7 +415,7 @@ class _sandDivider extends CustomPainter {
     path.close();
 
     canvas.drawPath(path, paint);
-    canvas.drawPath(path, borderPaint);
+    //canvas.drawPath(path, borderPaint);
   }
 
   @override

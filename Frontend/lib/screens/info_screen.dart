@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class InfoScreen extends StatefulWidget {
   const InfoScreen({super.key});
@@ -8,35 +9,23 @@ class InfoScreen extends StatefulWidget {
 }
 
 class _InfoScreenState extends State<InfoScreen> {
-  final TextEditingController _textController = TextEditingController();
-  int _selectedIndex = 2; // For bottom navigation bar
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    super.dispose();
-  }
+  int _selectedIndex = 2;
 
   void _onNavItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
 
-    // Handle navigation based on selected index
     switch (index) {
       case 0:
-        // Navigate to garden screen
         Navigator.pushNamed(context, '/garden');
         break;
       case 1:
-        // Navigate to home screen
         Navigator.pushNamed(context, '/home');
         break;
       case 2:
-        // Already on info screen
         break;
       case 3:
-        // Navigate to user screen
         Navigator.pushNamed(context, '/user');
         break;
     }
@@ -44,12 +33,13 @@ class _InfoScreenState extends State<InfoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final plantId = ModalRoute.of(context)?.settings.arguments as String?;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF20854F), // Green background
+      backgroundColor: const Color(0xFF20854F),
       body: SafeArea(
         child: Column(
           children: [
-            // Top decoration row (logo icon)
             Padding(
               padding: const EdgeInsets.only(
                 top: 10.0,
@@ -59,10 +49,7 @@ class _InfoScreenState extends State<InfoScreen> {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  // Logo icon
-                  _LogoIcon(),
-                ],
+                children: [_LogoIcon()],
               ),
             ),
 
@@ -76,63 +63,96 @@ class _InfoScreenState extends State<InfoScreen> {
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Plant image card
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFB8CFAF),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Image.asset(
-                      'assets/images/plant_sample.png',
-                      height: 150,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
+              child: plantId == null
+                  ? const Center(
+                      child: Text(
+                        'Tap a plant in your garden\nto view its info',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFF5A7C5A),
+                        ),
+                      ),
+                    )
+                  : FutureBuilder<DocumentSnapshot>(
+                      future: FirebaseFirestore.instance
+                          .collection('plants')
+                          .doc(plantId)
+                          .get(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
 
-                  const SizedBox(height: 12),
+                        final plant = snapshot.data!;
+                        final imagePath = plant['goodImagePath'] ??
+                            'assets/images/plant_sample.png';
+                        final name = plant['name'] ?? 'Plant name';
+                        final habitat = plant['habitat'] ?? '??';
+                        final lifespan =
+                            plant['lifespan']?.toString() ?? '??';
+                        final funFact = plant['funfact'] ?? '???';
 
-                  // Plant name
-                  const Text(
-                    'Plant name',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF3B5D3B),
-                    ),
-                  ),
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFB8CFAF),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Image.asset(
+                                imagePath,
+                                height: 150,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
 
-                  const SizedBox(height: 12),
+                            const SizedBox(height: 12),
 
-                  // Info box
-                  Container(
-                    width: double.infinity,
-                    height: MediaQuery.of(context).size.height * 0.28,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFA8C3B5),
-                      borderRadius: BorderRadius.circular(16),
+                            Text(
+                              name,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF3B5D3B),
+                              ),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            Container(
+                              width: double.infinity,
+                              height:
+                                  MediaQuery.of(context).size.height * 0.28,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFA8C3B5),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                'habitat: $habitat\n'
+                                'lifespan: $lifespan years\n'
+                                'fun fact: $funFact',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0xFF2F4F3A),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
-                    child: const Text(
-                      'habitat: ??\n'
-                      'lifespan: ??\n'
-                      'fun fact about the plant: ???',
-                      style: TextStyle(fontSize: 14, color: Color(0xFF2F4F3A)),
-                    ),
-                  ),
-                ],
-              ),
             ),
 
             const Spacer(flex: 1),
           ],
         ),
       ),
-      // Bottom navigation bar
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -142,7 +162,8 @@ class _InfoScreenState extends State<InfoScreen> {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 24.0),
+          padding:
+              const EdgeInsets.symmetric(vertical: 10.0, horizontal: 24.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -174,7 +195,6 @@ class _InfoScreenState extends State<InfoScreen> {
   }
 }
 
-// Logo icon widget
 class _LogoIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -186,7 +206,6 @@ class _LogoIcon extends StatelessWidget {
   }
 }
 
-// Navigation bar item
 class _NavBarItem extends StatelessWidget {
   final String imagePath;
   final bool isSelected;
@@ -208,7 +227,7 @@ class _NavBarItem extends StatelessWidget {
         padding: const EdgeInsets.all(5),
         child: Image.asset(
           imagePath,
-          color: isSelected ? Color(0xFF5A7C5A) : null,
+          color: isSelected ? const Color(0xFF5A7C5A) : null,
           fit: BoxFit.contain,
         ),
       ),

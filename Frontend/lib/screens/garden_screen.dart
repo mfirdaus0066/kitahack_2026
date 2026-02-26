@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../screens/collection.dart';
 
 class GardenScreen extends StatefulWidget {
   const GardenScreen({super.key});
@@ -96,7 +97,7 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 490,
                   left: 75,
                   child: _emptySpot(
-                    topWidget: _plantBtn(),
+                    topWidget: PlantBtn(),
                     bottomWidget: _rock(),
                   ),
                 ),
@@ -105,7 +106,7 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 370,
                   left: 20,
                   child: _emptySpot(
-                    topWidget: _plantBtn(),
+                    topWidget: PlantBtn(),
                     bottomWidget: _rock(),
                   ),
                 ),
@@ -114,7 +115,7 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 250,
                   left: 5,
                   child: _emptySpot(
-                    topWidget: _plantBtn(),
+                    topWidget: PlantBtn(),
                     bottomWidget: _rock(),
                   ),
                 ),
@@ -123,7 +124,7 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 360,
                   right: 45,
                   child: _emptySpot(
-                    topWidget: _plantBtn(),
+                    topWidget: PlantBtn(),
                     bottomWidget: _rock(),
                   ),
                 ),
@@ -132,7 +133,7 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 160,
                   left: 85,
                   child: _emptySpot(
-                    topWidget: _plantBtn(),
+                    topWidget: PlantBtn(),
                     bottomWidget: _rock(),
                   ),
                 ),
@@ -141,7 +142,7 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 240,
                   right: 10,
                   child: _emptySpot(
-                    topWidget: _plantBtn(),
+                    topWidget: PlantBtn(),
                     bottomWidget: _rock(),
                   ),
                 ),
@@ -150,7 +151,7 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 130,
                   right: 15,
                   child: _emptySpot(
-                    topWidget: _plantBtn(),
+                    topWidget: PlantBtn(),
                     bottomWidget: _rock(),
                   ),
                 ),
@@ -159,7 +160,7 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 60,
                   left: 5,
                   child: _emptySpot(
-                    topWidget: _plantBtn(),
+                    topWidget: PlantBtn(),
                     bottomWidget: _rock(),
                   ),
                 ),
@@ -168,7 +169,7 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 20,
                   right: 10,
                   child: _emptySpot(
-                    topWidget: _plantBtn(),
+                    topWidget: PlantBtn(),
                     bottomWidget: _rock(),
                   ),
                 ),
@@ -248,24 +249,39 @@ class _GlovesIcon extends StatelessWidget {
   }
 }
 
-class _plantBtn extends StatelessWidget {
+class PlantBtn extends StatelessWidget {
+  const PlantBtn({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 60,
-      height: 60,
-      child: Column(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(100),
-            child: Image.asset(
-              'assets/icons/add_plant_icon.png',
-              height: 60,
-              width: 60,
-              fit: BoxFit.contain,
+    return GestureDetector(
+      onTap: () async {
+        final selectedPlant = await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CollectionScreen()),
+        );
+
+        if (selectedPlant != null) {
+          print("plant selected: ${selectedPlant['title']}");
+          //for add to garden
+        }
+      },
+      child: SizedBox(
+        width: 60,
+        height: 60,
+        child: Column(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(100),
+              child: Image.asset(
+                'assets/icons/add_plant_icon.png',
+                height: 60,
+                width: 60,
+                fit: BoxFit.contain,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

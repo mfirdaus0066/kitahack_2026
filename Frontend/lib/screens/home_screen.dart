@@ -1,5 +1,7 @@
 import 'package:arnima/main.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,7 +14,103 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isExpanded = false;
   String _lastMessage = '';
   final TextEditingController _textController = TextEditingController();
-  int _selectedIndex = 1; // Home is selected by default
+  int _selectedIndex = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadAndShowPopupIfNeeded();
+    });
+  }
+
+  Future<void> _loadAndShowPopupIfNeeded() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+
+    final data = userDoc.data();
+    if (data == null) return;
+
+    final currentPlantId = data['currentPlantId'];
+    if (currentPlantId == null) return;
+
+    final plantAssignedAt = (data['plantAssignedAt'] as Timestamp?)?.toDate();
+    final popupShownAt = (data['popupShownAt'] as Timestamp?)?.toDate();
+
+    if (plantAssignedAt == null) return;
+    if (popupShownAt != null && !plantAssignedAt.isAfter(popupShownAt)) return;
+
+    final plantDoc = await FirebaseFirestore.instance
+        .collection('plants')
+        .doc(currentPlantId)
+        .get();
+
+    if (!plantDoc.exists) return;
+
+    final plantName = plantDoc['name'] ?? '';
+    final imagePath = plantDoc['goodImagePath'] ?? 'assets/images/plant_sample.png';
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .update({'popupShownAt': FieldValue.serverTimestamp()});
+
+    if (!mounted) return;
+    _showWeeklyPlantPopup(plantName, imagePath);
+  }
+
+  void _showWeeklyPlantPopup(String plantName, String imagePath) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Image.asset(
+              imagePath,
+              width: 100,
+              height: 100,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'This week you got',
+              style: TextStyle(fontSize: 14, color: Color(0xFF5A7C5A)),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              plantName,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF20854F),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          Center(
+            child: TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'Yay!',
+                style: TextStyle(
+                    color: Color(0xFF20854F), fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -25,21 +123,16 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedIndex = index;
     });
 
-    // Handle navigation based on selected index
     switch (index) {
       case 0:
-        // Navigate to garden screen
         Navigator.pushNamed(context, '/garden');
         break;
       case 1:
-        // Already on home screen
         break;
       case 2:
-        // Navigate to info screen
         Navigator.pushNamed(context, '/info');
         break;
       case 3:
-        // Navigate to user screen
         Navigator.pushNamed(context, '/user');
         break;
     }
@@ -49,24 +142,21 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: const Color(0xFF20854F), // Green background
+      backgroundColor: const Color(0xFF20854F),
       body: SafeArea(
         child: Column(
           children: [
-            // Top decoration row (sun and watering can)
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Sun icon
                   GestureDetector(
                     onTap: () {
                       MyApp.of(context).toggleTheme();
                     },
                     child: _SunIcon(),
                   ),
-                  // Watering can icon
                   _WateringCanIcon(),
                 ],
               ),
@@ -74,7 +164,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const Spacer(flex: 1),
 
-            // Speech bubble text input
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40.0),
               child: Column(
@@ -90,7 +179,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       curve: Curves.easeInOut,
                       height: _isExpanded ? 140 : 70,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: const Color(0xFFB8CFAF),
@@ -102,13 +193,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           ? Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                // Message display area
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(16, 12, 16, 8),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      // Message text
                                       Text(
                                         'How is your day?',
                                         style: const TextStyle(
@@ -116,11 +207,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                           fontSize: 13,
                                         ),
                                       ),
-                                      // "user" label top right
                                       Align(
                                         alignment: Alignment.centerRight,
                                         child: Text(
-                                          _lastMessage.isNotEmpty ? _lastMessage : 'user',
+                                          _lastMessage.isNotEmpty
+                                              ? _lastMessage
+                                              : 'user',
                                           style: const TextStyle(
                                             color: Color(0xFF2F4F3A),
                                             fontSize: 13,
@@ -130,9 +222,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ],
                                   ),
                                 ),
-                                // Input bar
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(8, 0, 8, 8),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFA8C3B5),
@@ -154,7 +246,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 fontSize: 13,
                                               ),
                                               border: InputBorder.none,
-                                              contentPadding: EdgeInsets.symmetric(
+                                              contentPadding:
+                                                  EdgeInsets.symmetric(
                                                 horizontal: 16,
                                                 vertical: 12,
                                               ),
@@ -169,18 +262,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                             },
                                           ),
                                         ),
-                                        // Arrow button
                                         GestureDetector(
                                           onTap: () {
-                                            if (_textController.text.isNotEmpty) {
+                                            if (_textController
+                                                .text.isNotEmpty) {
                                               setState(() {
-                                                _lastMessage = _textController.text;
+                                                _lastMessage =
+                                                    _textController.text;
                                                 _textController.clear();
                                               });
                                             }
                                           },
                                           child: const Padding(
-                                            padding: EdgeInsets.only(right: 20),
+                                            padding:
+                                                EdgeInsets.only(right: 20),
                                             child: Text(
                                               '>',
                                               style: TextStyle(
@@ -196,9 +291,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ],
                             )
-                          // Collapsed state — just show a hint
                           : const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 70, vertical: 14),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 70, vertical: 14),
                               child: Text(
                                 'Tell me about your day',
                                 style: TextStyle(
@@ -209,11 +304,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                     ),
                   ),
-                  // Speech bubble pointer (always visible)
                   CustomPaint(
                     size: const Size(40, 20),
                     painter: _SpeechBubblePointer(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                     ),
                   ),
                 ],
@@ -222,23 +318,79 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const Spacer(flex: 2),
 
-            // Plant illustration
-            // _PlantIllustration(),
-            // Plant illustration (image)
-            SizedBox(
-              width: 200, // adjust size to match your UI
-              height: 300,
-              child: Image.asset(
-                'assets/images/plant_sample.png',
-                fit: BoxFit.contain,
-              ),
+            // Plant of the week
+            FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(FirebaseAuth.instance.currentUser?.uid)
+                  .get(),
+              builder: (context, userSnapshot) {
+                if (!userSnapshot.hasData) {
+                  return const SizedBox(
+                    width: 200,
+                    height: 300,
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                final currentPlantId =
+                    userSnapshot.data?.get('currentPlantId');
+                if (currentPlantId == null) {
+                  return const SizedBox(
+                    width: 200,
+                    height: 300,
+                    child: Center(child: Text('No plant yet')),
+                  );
+                }
+
+                return FutureBuilder<DocumentSnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection('plants')
+                      .doc(currentPlantId)
+                      .get(),
+                  builder: (context, plantSnapshot) {
+                    if (!plantSnapshot.hasData) {
+                      return const SizedBox(
+                        width: 200,
+                        height: 300,
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+
+                    final plant = plantSnapshot.data!;
+                    final imagePath = plant['goodImagePath'] ??
+                        'assets/images/plant_sample.png';
+                    final plantName = plant['name'] ?? '';
+
+                    return Column(
+                      children: [
+                        SizedBox(
+                          width: 200,
+                          height: 270,
+                          child: Image.asset(
+                            imagePath,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        Text(
+                          plantName,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
             ),
 
             const Spacer(flex: 1),
           ],
         ),
       ),
-      // Bottom navigation bar
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainer,
@@ -248,7 +400,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 24.0),
+          padding:
+              const EdgeInsets.symmetric(vertical: 10.0, horizontal: 24.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -280,7 +433,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// Sun icon widget
 class _SunIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -292,7 +444,6 @@ class _SunIcon extends StatelessWidget {
   }
 }
 
-// Watering can icon widget
 class _WateringCanIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -307,7 +458,6 @@ class _WateringCanIcon extends StatelessWidget {
   }
 }
 
-// Speech bubble pointer painter
 class _SpeechBubblePointer extends CustomPainter {
   final Color color;
   const _SpeechBubblePointer({required this.color});
@@ -331,7 +481,6 @@ class _SpeechBubblePointer extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// Navigation bar item
 class _NavBarItem extends StatelessWidget {
   final String imagePath;
   final bool isSelected;
@@ -353,7 +502,7 @@ class _NavBarItem extends StatelessWidget {
         padding: const EdgeInsets.all(5),
         child: Image.asset(
           imagePath,
-          color: isSelected ? Color(0xFF5A7C5A) : null,
+          color: isSelected ? const Color(0xFF5A7C5A) : null,
           fit: BoxFit.contain,
         ),
       ),

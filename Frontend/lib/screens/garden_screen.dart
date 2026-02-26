@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../screens/collection.dart';
 
@@ -10,17 +9,8 @@ class GardenScreen extends StatefulWidget {
 }
 
 class _GardenScreenState extends State<GardenScreen> {
-  final TextEditingController _textController = TextEditingController();
   int _selectedIndex = 0;
-
-  // Store selected plant per spot index
   final Map<int, Map<String, dynamic>> _gardenSpots = {};
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    super.dispose();
-  }
 
   void _onNavItemTapped(int index) {
     setState(() {
@@ -43,9 +33,15 @@ class _GardenScreenState extends State<GardenScreen> {
   }
 
   Future<void> _onSpotTapped(int spotIndex) async {
+    final placedIds = _gardenSpots.values
+        .map((p) => p['plantId'] as String)
+        .toList();
+
     final selectedPlant = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const CollectionScreen()),
+      MaterialPageRoute(
+        builder: (_) => CollectionScreen(placedPlantIds: placedIds),
+      ),
     );
 
     if (selectedPlant != null) {
@@ -108,7 +104,6 @@ class _GardenScreenState extends State<GardenScreen> {
                     onTap: _onSpotTapped,
                   ),
                 ),
-
                 Positioned(
                   top: 370,
                   left: 20,
@@ -118,7 +113,6 @@ class _GardenScreenState extends State<GardenScreen> {
                     onTap: _onSpotTapped,
                   ),
                 ),
-
                 Positioned(
                   top: 250,
                   left: 5,
@@ -128,7 +122,6 @@ class _GardenScreenState extends State<GardenScreen> {
                     onTap: _onSpotTapped,
                   ),
                 ),
-
                 Positioned(
                   top: 360,
                   right: 45,
@@ -138,7 +131,6 @@ class _GardenScreenState extends State<GardenScreen> {
                     onTap: _onSpotTapped,
                   ),
                 ),
-
                 Positioned(
                   top: 160,
                   left: 85,
@@ -148,7 +140,6 @@ class _GardenScreenState extends State<GardenScreen> {
                     onTap: _onSpotTapped,
                   ),
                 ),
-
                 Positioned(
                   top: 240,
                   right: 10,
@@ -158,7 +149,6 @@ class _GardenScreenState extends State<GardenScreen> {
                     onTap: _onSpotTapped,
                   ),
                 ),
-
                 Positioned(
                   top: 130,
                   right: 15,
@@ -168,7 +158,6 @@ class _GardenScreenState extends State<GardenScreen> {
                     onTap: _onSpotTapped,
                   ),
                 ),
-
                 Positioned(
                   top: 60,
                   left: 5,
@@ -178,7 +167,6 @@ class _GardenScreenState extends State<GardenScreen> {
                     onTap: _onSpotTapped,
                   ),
                 ),
-
                 Positioned(
                   top: 20,
                   right: 10,
@@ -283,7 +271,6 @@ class _emptySpot extends StatelessWidget {
         height: 100,
         child: Column(
           children: [
-            // Show plant image if selected, otherwise show add button
             plantData != null
                 ? Image.asset(
                     plantData!['imagePath'],
@@ -315,7 +302,8 @@ class _rock extends StatelessWidget {
     return SizedBox(
       width: 90,
       height: 30,
-      child: Image.asset('assets/images/garden_rock.png', fit: BoxFit.contain),
+      child:
+          Image.asset('assets/images/garden_rock.png', fit: BoxFit.contain),
     );
   }
 }

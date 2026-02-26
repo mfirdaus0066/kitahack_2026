@@ -44,6 +44,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF20854F),
       appBar: AppBar(title: const Text("Collection")),
       body: StreamBuilder<QuerySnapshot>(
         //to make flutter listen to changes in firebase

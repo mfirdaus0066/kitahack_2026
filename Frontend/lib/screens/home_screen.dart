@@ -179,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeInOut,
-                      height: _isExpanded ? 140 : 70,
+                      height: _isExpanded ? 120 : 70,
                       decoration: BoxDecoration(
                         color: Theme.of(
                           context,
@@ -240,6 +240,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       color: const Color(0xFFA8C3B5),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
+                                    child: SizedBox(
+                                      height: 35,
                                     child: Row(
                                       children: [
                                         Expanded(
@@ -286,16 +288,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                           },
                                           child: const Padding(
                                             padding: EdgeInsets.only(right: 20),
-                                            child: Text(
-                                              '>',
-                                              style: TextStyle(
-                                                color: Color(0xFF3B5D3B),
-                                                fontSize: 18,
-                                              ),
+                                            child: Icon(
+                                              Icons.arrow_circle_right_outlined,
+                                              color: Color(0xFF3B5D3B),
+                                              size: 24,
                                             ),
                                           ),
                                         ),
                                       ],
+                                    ),
                                     ),
                                   ),
                                 ),

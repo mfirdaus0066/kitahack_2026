@@ -111,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             fontWeight: FontWeight.w500,
                           ),
                           decoration: InputDecoration(
-                            hintText: 'Username',
+                            hintText: 'Email',
                             hintStyle: TextStyle(
                               color: const Color.fromARGB(255, 128, 159, 143),
                               fontWeight: FontWeight.w500,

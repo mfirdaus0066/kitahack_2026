@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../screens/collection.dart';
-import '../controller/garden_controller.dart';
 
 class GardenScreen extends StatefulWidget {
   const GardenScreen({super.key});
@@ -13,8 +12,8 @@ class GardenScreen extends StatefulWidget {
 
 class _GardenScreenState extends State<GardenScreen> {
   int _selectedIndex = 0;
-  final Map<int, Map<String, dynamic>> _gardenSpots =
-      GardenController.instance.spots;
+  // Only store plantId per spot
+  final Map<int, String> _gardenSpots = {};
 
   @override
   void initState() {
@@ -32,11 +31,11 @@ class _GardenScreenState extends State<GardenScreen> {
         .collection('gardenSpots')
         .get();
 
-    final Map<int, Map<String, dynamic>> loaded = {};
+    final Map<int, String> loaded = {};
     for (final doc in snapshot.docs) {
       final spotIndex = int.tryParse(doc.id);
-      if (spotIndex != null) {
-        loaded[spotIndex] = doc.data();
+      if (spotIndex != null && doc.data()['plantId'] != null) {
+        loaded[spotIndex] = doc.data()['plantId'] as String;
       }
     }
 
@@ -45,8 +44,7 @@ class _GardenScreenState extends State<GardenScreen> {
     });
   }
 
-  Future<void> _saveSpotToFirestore(
-      int spotIndex, Map<String, dynamic> plantData) async {
+  Future<void> _saveSpotToFirestore(int spotIndex, String plantId) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
 
@@ -55,7 +53,7 @@ class _GardenScreenState extends State<GardenScreen> {
         .doc(uid)
         .collection('gardenSpots')
         .doc(spotIndex.toString())
-        .set(plantData);
+        .set({'plantId': plantId});
   }
 
   void _onNavItemTapped(int index) {
@@ -79,9 +77,83 @@ class _GardenScreenState extends State<GardenScreen> {
   }
 
   Future<void> _onSpotTapped(int spotIndex) async {
-    final placedIds = _gardenSpots.values
-        .map((p) => p['plantId'] as String)
-        .toList();
+    if (_gardenSpots.containsKey(spotIndex)) {
+      final plantId = _gardenSpots[spotIndex]!;
+
+      // Fetch latest plant data from plants collection
+      final plantDoc = await FirebaseFirestore.instance
+          .collection('plants')
+          .doc(plantId)
+          .get();
+
+      if (!plantDoc.exists) return;
+
+      final plantName = plantDoc['name'] ?? 'Plant';
+      final imagePath = plantDoc['goodImagePath'] ?? 'assets/images/plant_sample.png';
+
+      if (!mounted) return;
+
+      final action = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+          title: Text(
+            plantName,
+            style: const TextStyle(
+              color: Color(0xFF20854F),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                imagePath,
+                width: 100,
+                height: 100,
+                fit: BoxFit.contain,
+              ),
+            ],
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, 'info'),
+                  child: const Text(
+                    'View Info',
+                    style: TextStyle(color: Color(0xFF5A7C5A)),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, 'change'),
+                  child: const Text(
+                    'Change Plant',
+                    style: TextStyle(
+                      color: Color(0xFF20854F),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+
+      if (action == 'info') {
+        Navigator.pushNamed(context, '/info', arguments: plantId);
+        return;
+      } else if (action == 'change') {
+        // fall through to collection picker
+      } else {
+        return;
+      }
+    }
+
+    final placedIds = _gardenSpots.values.toList();
 
     final selectedPlant = await Navigator.push(
       context,
@@ -91,10 +163,11 @@ class _GardenScreenState extends State<GardenScreen> {
     );
 
     if (selectedPlant != null) {
+      final plantId = selectedPlant['plantId'] as String;
       setState(() {
-        _gardenSpots[spotIndex] = selectedPlant;
+        _gardenSpots[spotIndex] = plantId;
       });
-      await _saveSpotToFirestore(spotIndex, selectedPlant);
+      await _saveSpotToFirestore(spotIndex, plantId);
     }
   }
 
@@ -129,71 +202,57 @@ class _GardenScreenState extends State<GardenScreen> {
                   child: CustomPaint(painter: _sandDivider()),
                 ),
 
-                /*Positioned(
-                  top: 500,
-                  right: -10,
-                  child: Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4.identity()..scale(-1.0, 1.0),
-                    child: _stone(),
-                  ),
-                ),*/
                 Positioned(
                   top: 490,
                   left: 75,
                   child: _emptySpot(
                     spotIndex: 0,
-                    plantData: _gardenSpots[0],
+                    plantId: _gardenSpots[0],
                     onTap: _onSpotTapped,
                   ),
                 ),
-
                 Positioned(
                   top: 370,
                   left: 20,
                   child: _emptySpot(
                     spotIndex: 1,
-                    plantData: _gardenSpots[1],
+                    plantId: _gardenSpots[1],
                     onTap: _onSpotTapped,
                   ),
                 ),
-
                 Positioned(
                   top: 250,
                   left: 5,
                   child: _emptySpot(
                     spotIndex: 2,
-                    plantData: _gardenSpots[2],
+                    plantId: _gardenSpots[2],
                     onTap: _onSpotTapped,
                   ),
                 ),
-
                 Positioned(
                   top: 360,
                   right: 45,
                   child: _emptySpot(
                     spotIndex: 3,
-                    plantData: _gardenSpots[3],
+                    plantId: _gardenSpots[3],
                     onTap: _onSpotTapped,
                   ),
                 ),
-
                 Positioned(
                   top: 500,
                   right: 5,
                   child: _emptySpot(
                     spotIndex: 4,
-                    plantData: _gardenSpots[4],
+                    plantId: _gardenSpots[4],
                     onTap: _onSpotTapped,
                   ),
                 ),
-
                 Positioned(
                   top: 160,
                   left: 85,
                   child: _emptySpot(
                     spotIndex: 5,
-                    plantData: _gardenSpots[5],
+                    plantId: _gardenSpots[5],
                     onTap: _onSpotTapped,
                   ),
                 ),
@@ -202,7 +261,7 @@ class _GardenScreenState extends State<GardenScreen> {
                   right: 10,
                   child: _emptySpot(
                     spotIndex: 6,
-                    plantData: _gardenSpots[6],
+                    plantId: _gardenSpots[6],
                     onTap: _onSpotTapped,
                   ),
                 ),
@@ -211,7 +270,7 @@ class _GardenScreenState extends State<GardenScreen> {
                   right: 15,
                   child: _emptySpot(
                     spotIndex: 7,
-                    plantData: _gardenSpots[7],
+                    plantId: _gardenSpots[7],
                     onTap: _onSpotTapped,
                   ),
                 ),
@@ -220,7 +279,7 @@ class _GardenScreenState extends State<GardenScreen> {
                   left: 5,
                   child: _emptySpot(
                     spotIndex: 8,
-                    plantData: _gardenSpots[8],
+                    plantId: _gardenSpots[8],
                     onTap: _onSpotTapped,
                   ),
                 ),
@@ -229,7 +288,7 @@ class _GardenScreenState extends State<GardenScreen> {
                   right: 10,
                   child: _emptySpot(
                     spotIndex: 9,
-                    plantData: _gardenSpots[9],
+                    plantId: _gardenSpots[9],
                     onTap: _onSpotTapped,
                   ),
                 ),
@@ -308,13 +367,13 @@ class _GlovesIcon extends StatelessWidget {
 
 class _emptySpot extends StatelessWidget {
   final int spotIndex;
-  final Map<String, dynamic>? plantData;
+  final String? plantId;
   final Function(int) onTap;
 
   const _emptySpot({
     super.key,
     required this.spotIndex,
-    required this.plantData,
+    required this.plantId,
     required this.onTap,
   });
 
@@ -327,23 +386,29 @@ class _emptySpot extends StatelessWidget {
         height: 100,
         child: Column(
           children: [
-            plantData != null
-                ? SizedBox(
-                    width: 65,
-                    height: 65,
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          bottom: -2,
-                          child: Image.asset(
-                            plantData!['imagePath'],
-                            width: 65,
-                            height: 65,
-                            fit: BoxFit.contain,
-                          ),
+            plantId != null
+                ? FutureBuilder<DocumentSnapshot>(
+                    future: FirebaseFirestore.instance
+                        .collection('plants')
+                        .doc(plantId)
+                        .get(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const SizedBox(width: 65, height: 65);
+                      }
+                      final imagePath = snapshot.data!['goodImagePath'] ??
+                          'assets/images/plant_sample.png';
+                      return SizedBox(
+                        width: 65,
+                        height: 65,
+                        child: Image.asset(
+                          imagePath,
+                          width: 65,
+                          height: 65,
+                          fit: BoxFit.contain,
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   )
                 : ClipRRect(
                     borderRadius: BorderRadius.circular(100),

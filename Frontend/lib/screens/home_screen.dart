@@ -53,12 +53,12 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!plantDoc.exists) return;
 
     final plantName = plantDoc['name'] ?? '';
-    final imagePath = plantDoc['goodImagePath'] ?? 'assets/images/plant_sample.png';
+    final imagePath =
+        plantDoc['goodImagePath'] ?? 'assets/images/plant_sample.png';
 
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .update({'popupShownAt': FieldValue.serverTimestamp()});
+    await FirebaseFirestore.instance.collection('users').doc(uid).update({
+      'popupShownAt': FieldValue.serverTimestamp(),
+    });
 
     if (!mounted) return;
     _showWeeklyPlantPopup(plantName, imagePath);
@@ -103,7 +103,9 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Text(
                 'Yay!',
                 style: TextStyle(
-                    color: Color(0xFF20854F), fontWeight: FontWeight.bold),
+                  color: Color(0xFF20854F),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -194,8 +196,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    12,
+                                    16,
+                                    8,
+                                  ),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -223,8 +229,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                                 Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    8,
+                                    0,
+                                    8,
+                                    8,
+                                  ),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFA8C3B5),
@@ -248,9 +258,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                               border: InputBorder.none,
                                               contentPadding:
                                                   EdgeInsets.symmetric(
-                                                horizontal: 16,
-                                                vertical: 12,
-                                              ),
+                                                    horizontal: 16,
+                                                    vertical: 12,
+                                                  ),
                                             ),
                                             onSubmitted: (value) {
                                               if (value.isNotEmpty) {
@@ -265,7 +275,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         GestureDetector(
                                           onTap: () {
                                             if (_textController
-                                                .text.isNotEmpty) {
+                                                .text
+                                                .isNotEmpty) {
                                               setState(() {
                                                 _lastMessage =
                                                     _textController.text;
@@ -274,8 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             }
                                           },
                                           child: const Padding(
-                                            padding:
-                                                EdgeInsets.only(right: 20),
+                                            padding: EdgeInsets.only(right: 20),
                                             child: Text(
                                               '>',
                                               style: TextStyle(
@@ -293,7 +303,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             )
                           : const Padding(
                               padding: EdgeInsets.symmetric(
-                                  horizontal: 70, vertical: 14),
+                                horizontal: 70,
+                                vertical: 14,
+                              ),
                               child: Text(
                                 'Tell me about your day',
                                 style: TextStyle(
@@ -333,8 +345,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 }
 
-                final currentPlantId =
-                    userSnapshot.data?.get('currentPlantId');
+                final currentPlantId = userSnapshot.data?.get('currentPlantId');
                 if (currentPlantId == null) {
                   return const SizedBox(
                     width: 200,
@@ -358,28 +369,28 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
 
                     final plant = plantSnapshot.data!;
-                    final imagePath = plant['goodImagePath'] ??
+                    final imagePath =
+                        plant['goodImagePath'] ??
                         'assets/images/plant_sample.png';
-                    final plantName = plant['name'] ?? '';
 
                     return Column(
                       children: [
                         SizedBox(
-                          width: 200,
+                          width: 240,
                           height: 270,
-                          child: Image.asset(
-                            imagePath,
-                            fit: BoxFit.contain,
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                bottom: -6,
+                                child: Image.asset(
+                                  imagePath,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        Text(
-                          plantName,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                        _plantTable(),
                       ],
                     );
                   },
@@ -400,8 +411,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         child: Padding(
-          padding:
-              const EdgeInsets.symmetric(vertical: 10.0, horizontal: 24.0),
+          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 24.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -479,6 +489,24 @@ class _SpeechBubblePointer extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _plantTable extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 260,
+      height: 200,
+      child: Stack(
+        children: [
+          Positioned(
+            bottom: 0,
+            child: Image.asset('assets/images/table.png', fit: BoxFit.contain),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _NavBarItem extends StatelessWidget {

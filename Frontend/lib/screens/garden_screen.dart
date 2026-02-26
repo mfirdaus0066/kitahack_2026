@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../screens/collection.dart';
+import '../controller/garden_controller.dart';
 
 class GardenScreen extends StatefulWidget {
   const GardenScreen({super.key});
@@ -10,7 +11,8 @@ class GardenScreen extends StatefulWidget {
 
 class _GardenScreenState extends State<GardenScreen> {
   int _selectedIndex = 0;
-  final Map<int, Map<String, dynamic>> _gardenSpots = {};
+  final Map<int, Map<String, dynamic>> _gardenSpots =
+      GardenController.instance.spots;
 
   void _onNavItemTapped(int index) {
     setState(() {
@@ -62,10 +64,7 @@ class _GardenScreenState extends State<GardenScreen> {
               padding: const EdgeInsets.all(20.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _CollaborationIcon(),
-                  _GlovesIcon(),
-                ],
+                children: [_CollaborationIcon(), _GlovesIcon()],
               ),
             ),
 
@@ -85,7 +84,7 @@ class _GardenScreenState extends State<GardenScreen> {
                   child: CustomPaint(painter: _sandDivider()),
                 ),
 
-                Positioned(
+                /*Positioned(
                   top: 500,
                   right: -10,
                   child: Transform(
@@ -93,8 +92,7 @@ class _GardenScreenState extends State<GardenScreen> {
                     transform: Matrix4.identity()..scale(-1.0, 1.0),
                     child: _stone(),
                   ),
-                ),
-
+                ),*/
                 Positioned(
                   top: 490,
                   left: 75,
@@ -104,6 +102,7 @@ class _GardenScreenState extends State<GardenScreen> {
                     onTap: _onSpotTapped,
                   ),
                 ),
+
                 Positioned(
                   top: 370,
                   left: 20,
@@ -113,6 +112,7 @@ class _GardenScreenState extends State<GardenScreen> {
                     onTap: _onSpotTapped,
                   ),
                 ),
+
                 Positioned(
                   top: 250,
                   left: 5,
@@ -122,6 +122,7 @@ class _GardenScreenState extends State<GardenScreen> {
                     onTap: _onSpotTapped,
                   ),
                 ),
+
                 Positioned(
                   top: 360,
                   right: 45,
@@ -131,18 +132,20 @@ class _GardenScreenState extends State<GardenScreen> {
                     onTap: _onSpotTapped,
                   ),
                 ),
+
                 Positioned(
-                  top: 160,
-                  left: 85,
+                  top: 500,
+                  right: 5,
                   child: _emptySpot(
                     spotIndex: 4,
                     plantData: _gardenSpots[4],
                     onTap: _onSpotTapped,
                   ),
                 ),
+
                 Positioned(
-                  top: 240,
-                  right: 10,
+                  top: 160,
+                  left: 85,
                   child: _emptySpot(
                     spotIndex: 5,
                     plantData: _gardenSpots[5],
@@ -150,8 +153,8 @@ class _GardenScreenState extends State<GardenScreen> {
                   ),
                 ),
                 Positioned(
-                  top: 130,
-                  right: 15,
+                  top: 240,
+                  right: 10,
                   child: _emptySpot(
                     spotIndex: 6,
                     plantData: _gardenSpots[6],
@@ -159,8 +162,8 @@ class _GardenScreenState extends State<GardenScreen> {
                   ),
                 ),
                 Positioned(
-                  top: 60,
-                  left: 5,
+                  top: 130,
+                  right: 15,
                   child: _emptySpot(
                     spotIndex: 7,
                     plantData: _gardenSpots[7],
@@ -168,11 +171,20 @@ class _GardenScreenState extends State<GardenScreen> {
                   ),
                 ),
                 Positioned(
-                  top: 20,
-                  right: 10,
+                  top: 60,
+                  left: 5,
                   child: _emptySpot(
                     spotIndex: 8,
                     plantData: _gardenSpots[8],
+                    onTap: _onSpotTapped,
+                  ),
+                ),
+                Positioned(
+                  top: 20,
+                  right: 10,
+                  child: _emptySpot(
+                    spotIndex: 9,
+                    plantData: _gardenSpots[9],
                     onTap: _onSpotTapped,
                   ),
                 ),
@@ -192,8 +204,7 @@ class _GardenScreenState extends State<GardenScreen> {
           ),
         ),
         child: Padding(
-          padding:
-              const EdgeInsets.symmetric(vertical: 10.0, horizontal: 24.0),
+          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 24.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -272,11 +283,22 @@ class _emptySpot extends StatelessWidget {
         child: Column(
           children: [
             plantData != null
-                ? Image.asset(
-                    plantData!['imagePath'],
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.contain,
+                ? SizedBox(
+                    width: 65,
+                    height: 65,
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          bottom: -2,
+                          child: Image.asset(
+                            plantData!['imagePath'],
+                            width: 65,
+                            height: 65,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ],
+                    ),
                   )
                 : ClipRRect(
                     borderRadius: BorderRadius.circular(100),
@@ -302,8 +324,7 @@ class _rock extends StatelessWidget {
     return SizedBox(
       width: 90,
       height: 30,
-      child:
-          Image.asset('assets/images/garden_rock.png', fit: BoxFit.contain),
+      child: Image.asset('assets/images/garden_rock.png', fit: BoxFit.contain),
     );
   }
 }

@@ -38,7 +38,9 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       } else {
         await createUserDoc(); // create/check Firestore doc
-        await _auth.assignWeeklyPlant(result.uid); // give user plant if new log in or every week
+        await _auth.assignWeeklyPlant(
+          result.uid,
+        ); // give user plant if new log in or every week
         Navigator.pushReplacementNamed(context, '/home');
         debugPrint('Sign in success for UID: ${result.uid}');
       }

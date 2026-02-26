@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../screens/collection.dart';
 import '../controller/garden_controller.dart';
 
@@ -13,6 +15,48 @@ class _GardenScreenState extends State<GardenScreen> {
   int _selectedIndex = 0;
   final Map<int, Map<String, dynamic>> _gardenSpots =
       GardenController.instance.spots;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGardenSpots();
+  }
+
+  Future<void> _loadGardenSpots() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('gardenSpots')
+        .get();
+
+    final Map<int, Map<String, dynamic>> loaded = {};
+    for (final doc in snapshot.docs) {
+      final spotIndex = int.tryParse(doc.id);
+      if (spotIndex != null) {
+        loaded[spotIndex] = doc.data();
+      }
+    }
+
+    setState(() {
+      _gardenSpots.addAll(loaded);
+    });
+  }
+
+  Future<void> _saveSpotToFirestore(
+      int spotIndex, Map<String, dynamic> plantData) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('gardenSpots')
+        .doc(spotIndex.toString())
+        .set(plantData);
+  }
 
   void _onNavItemTapped(int index) {
     setState(() {
@@ -50,6 +94,7 @@ class _GardenScreenState extends State<GardenScreen> {
       setState(() {
         _gardenSpots[spotIndex] = selectedPlant;
       });
+      await _saveSpotToFirestore(spotIndex, selectedPlant);
     }
   }
 

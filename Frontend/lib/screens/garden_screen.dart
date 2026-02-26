@@ -14,6 +14,7 @@ class _GardenScreenState extends State<GardenScreen> {
   int _selectedIndex = 0;
   // Only store plantId per spot
   final Map<int, String> _gardenSpots = {};
+  bool isDeleteMode = false;
 
   @override
   void initState() {
@@ -89,15 +90,20 @@ class _GardenScreenState extends State<GardenScreen> {
       if (!plantDoc.exists) return;
 
       final plantName = plantDoc['name'] ?? 'Plant';
-      final imagePath = plantDoc['goodImagePath'] ?? 'assets/images/plant_sample.png';
+      final imagePath =
+          plantDoc['goodImagePath'] ?? 'assets/images/plant_sample.png';
 
       if (!mounted) return;
 
       final action = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          backgroundColor: Theme.of(
+            context,
+          ).colorScheme.surfaceContainerHighest,
           title: Text(
             plantName,
             style: const TextStyle(
@@ -182,7 +188,17 @@ class _GardenScreenState extends State<GardenScreen> {
               padding: const EdgeInsets.all(20.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [_CollaborationIcon(), _GlovesIcon()],
+                children: [
+                  _CollaborationIcon(),
+                  _GlovesIcon(
+                    isDeleteMode: isDeleteMode,
+                    onTap: () {
+                      setState(() {
+                        isDeleteMode = !isDeleteMode;
+                      });
+                    },
+                  ),
+                ],
               ),
             ),
 
@@ -209,6 +225,18 @@ class _GardenScreenState extends State<GardenScreen> {
                     spotIndex: 0,
                     plantId: _gardenSpots[0],
                     onTap: _onSpotTapped,
+                    isDeleteMode: isDeleteMode,
+                    onDelete: () async {
+                      final userDoc = FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(FirebaseAuth.instance.currentUser?.uid)
+                          .collection('gardenSpots')
+                          .doc('0')
+                          .delete();
+                      setState(() {
+                        _gardenSpots.remove(0);
+                      });
+                    },
                   ),
                 ),
                 Positioned(
@@ -218,6 +246,18 @@ class _GardenScreenState extends State<GardenScreen> {
                     spotIndex: 1,
                     plantId: _gardenSpots[1],
                     onTap: _onSpotTapped,
+                    isDeleteMode: isDeleteMode,
+                    onDelete: () async {
+                      final userDoc = FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(FirebaseAuth.instance.currentUser?.uid)
+                          .collection('gardenSpots')
+                          .doc('1')
+                          .delete();
+                      setState(() {
+                        _gardenSpots.remove(1);
+                      });
+                    },
                   ),
                 ),
                 Positioned(
@@ -227,6 +267,18 @@ class _GardenScreenState extends State<GardenScreen> {
                     spotIndex: 2,
                     plantId: _gardenSpots[2],
                     onTap: _onSpotTapped,
+                    isDeleteMode: isDeleteMode,
+                    onDelete: () async {
+                      final userDoc = FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(FirebaseAuth.instance.currentUser?.uid)
+                          .collection('gardenSpots')
+                          .doc('2')
+                          .delete();
+                      setState(() {
+                        _gardenSpots.remove(2);
+                      });
+                    },
                   ),
                 ),
                 Positioned(
@@ -236,6 +288,18 @@ class _GardenScreenState extends State<GardenScreen> {
                     spotIndex: 3,
                     plantId: _gardenSpots[3],
                     onTap: _onSpotTapped,
+                    isDeleteMode: isDeleteMode,
+                    onDelete: () async {
+                      final userDoc = FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(FirebaseAuth.instance.currentUser?.uid)
+                          .collection('gardenSpots')
+                          .doc('3')
+                          .delete();
+                      setState(() {
+                        _gardenSpots.remove(3);
+                      });
+                    },
                   ),
                 ),
                 Positioned(
@@ -245,6 +309,18 @@ class _GardenScreenState extends State<GardenScreen> {
                     spotIndex: 4,
                     plantId: _gardenSpots[4],
                     onTap: _onSpotTapped,
+                    isDeleteMode: isDeleteMode,
+                    onDelete: () async {
+                      final userDoc = FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(FirebaseAuth.instance.currentUser?.uid)
+                          .collection('gardenSpots')
+                          .doc('4')
+                          .delete();
+                      setState(() {
+                        _gardenSpots.remove(4);
+                      });
+                    },
                   ),
                 ),
                 Positioned(
@@ -254,6 +330,18 @@ class _GardenScreenState extends State<GardenScreen> {
                     spotIndex: 5,
                     plantId: _gardenSpots[5],
                     onTap: _onSpotTapped,
+                    isDeleteMode: isDeleteMode,
+                    onDelete: () async {
+                      final userDoc = FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(FirebaseAuth.instance.currentUser?.uid)
+                          .collection('gardenSpots')
+                          .doc('5')
+                          .delete();
+                      setState(() {
+                        _gardenSpots.remove(5);
+                      });
+                    },
                   ),
                 ),
                 Positioned(
@@ -263,6 +351,18 @@ class _GardenScreenState extends State<GardenScreen> {
                     spotIndex: 6,
                     plantId: _gardenSpots[6],
                     onTap: _onSpotTapped,
+                    isDeleteMode: isDeleteMode,
+                    onDelete: () async {
+                      final userDoc = FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(FirebaseAuth.instance.currentUser?.uid)
+                          .collection('gardenSpots')
+                          .doc('6')
+                          .delete();
+                      setState(() {
+                        _gardenSpots.remove(6);
+                      });
+                    },
                   ),
                 ),
                 Positioned(
@@ -272,6 +372,18 @@ class _GardenScreenState extends State<GardenScreen> {
                     spotIndex: 7,
                     plantId: _gardenSpots[7],
                     onTap: _onSpotTapped,
+                    isDeleteMode: isDeleteMode,
+                    onDelete: () async {
+                      final userDoc = FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(FirebaseAuth.instance.currentUser?.uid)
+                          .collection('gardenSpots')
+                          .doc('7')
+                          .delete();
+                      setState(() {
+                        _gardenSpots.remove(7);
+                      });
+                    },
                   ),
                 ),
                 Positioned(
@@ -281,6 +393,19 @@ class _GardenScreenState extends State<GardenScreen> {
                     spotIndex: 8,
                     plantId: _gardenSpots[8],
                     onTap: _onSpotTapped,
+                    isDeleteMode: isDeleteMode,
+                    onDelete: () async {
+                      final userDoc = FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(FirebaseAuth.instance.currentUser?.uid)
+                          .collection('gardenSpots')
+                          .doc('8')
+                          .delete();
+
+                      setState(() {
+                        _gardenSpots.remove(8);
+                      });
+                    },
                   ),
                 ),
                 Positioned(
@@ -290,6 +415,19 @@ class _GardenScreenState extends State<GardenScreen> {
                     spotIndex: 9,
                     plantId: _gardenSpots[9],
                     onTap: _onSpotTapped,
+                    isDeleteMode: isDeleteMode,
+                    onDelete: () async {
+                      final userDoc = FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(FirebaseAuth.instance.currentUser?.uid)
+                          .collection('gardenSpots')
+                          .doc('9')
+                          .delete();
+
+                      setState(() {
+                        _gardenSpots.remove(9);
+                      });
+                    },
                   ),
                 ),
               ],
@@ -355,12 +493,24 @@ class _CollaborationIcon extends StatelessWidget {
 }
 
 class _GlovesIcon extends StatelessWidget {
+  final VoidCallback onTap;
+  final bool isDeleteMode;
+
+  const _GlovesIcon({
+    super.key,
+    required this.onTap,
+    required this.isDeleteMode,
+  });
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 60,
-      height: 60,
-      child: Image.asset('assets/icons/gloves_icon.png', fit: BoxFit.contain),
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 60,
+        height: 60,
+        child: Image.asset('assets/icons/gloves_icon.png', fit: BoxFit.contain),
+      ),
     );
   }
 }
@@ -369,12 +519,16 @@ class _emptySpot extends StatelessWidget {
   final int spotIndex;
   final String? plantId;
   final Function(int) onTap;
+  final bool isDeleteMode;
+  final VoidCallback onDelete;
 
   const _emptySpot({
     super.key,
     required this.spotIndex,
     required this.plantId,
     required this.onTap,
+    required this.isDeleteMode,
+    required this.onDelete,
   });
 
   @override
@@ -396,16 +550,42 @@ class _emptySpot extends StatelessWidget {
                       if (!snapshot.hasData) {
                         return const SizedBox(width: 65, height: 65);
                       }
-                      final imagePath = snapshot.data!['goodImagePath'] ??
+                      final imagePath =
+                          snapshot.data!['goodImagePath'] ??
                           'assets/images/plant_sample.png';
                       return SizedBox(
                         width: 65,
                         height: 65,
-                        child: Image.asset(
-                          imagePath,
-                          width: 65,
-                          height: 65,
-                          fit: BoxFit.contain,
+                        child: Stack(
+                          children: [
+                            Image.asset(
+                              imagePath,
+                              width: 65,
+                              height: 65,
+                              fit: BoxFit.contain,
+                            ),
+
+                            if (isDeleteMode)
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: onDelete,
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    padding: const EdgeInsets.all(3),
+                                    child: const Icon(
+                                      Icons.close,
+                                      size: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       );
                     },

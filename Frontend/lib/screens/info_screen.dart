@@ -134,8 +134,8 @@ class _InfoScreenState extends State<InfoScreen> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: Text(
-                                'habitat: $habitat\n\n'
-                                'lifespan: $lifespan\n\n'
+                                'habitat: $habitat\n'
+                                'lifespan: $lifespan\n'
                                 'fun fact: $funFact',
                                 style: const TextStyle(
                                   fontSize: 14,

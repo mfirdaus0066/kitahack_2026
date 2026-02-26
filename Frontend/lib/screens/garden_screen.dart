@@ -11,7 +11,10 @@ class GardenScreen extends StatefulWidget {
 
 class _GardenScreenState extends State<GardenScreen> {
   final TextEditingController _textController = TextEditingController();
-  int _selectedIndex = 0; // For bottom navigation bar
+  int _selectedIndex = 0;
+
+  // Store selected plant per spot index
+  final Map<int, Map<String, dynamic>> _gardenSpots = {};
 
   @override
   void dispose() {
@@ -24,42 +27,47 @@ class _GardenScreenState extends State<GardenScreen> {
       _selectedIndex = index;
     });
 
-    // Handle navigation based on selected index
     switch (index) {
       case 0:
-        // Navigate to garden screen
         break;
       case 1:
-        // Already on home screen
         Navigator.pushNamed(context, '/home');
         break;
       case 2:
-        // Navigate to info screen
         Navigator.pushNamed(context, '/info');
         break;
       case 3:
-        // Navigate to user screen
         Navigator.pushNamed(context, '/user');
         break;
+    }
+  }
+
+  Future<void> _onSpotTapped(int spotIndex) async {
+    final selectedPlant = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const CollectionScreen()),
+    );
+
+    if (selectedPlant != null) {
+      setState(() {
+        _gardenSpots[spotIndex] = selectedPlant;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF20854F), // Green background
+      backgroundColor: const Color(0xFF20854F),
       body: SafeArea(
         child: Column(
           children: [
-            // Top decoration row (collaboration and gloves icons)
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Collaboration icon
                   _CollaborationIcon(),
-                  // Gloves icon
                   _GlovesIcon(),
                 ],
               ),
@@ -75,14 +83,12 @@ class _GardenScreenState extends State<GardenScreen> {
                   color: Colors.green,
                 ),
 
-                //sand divider
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.95,
                   height: MediaQuery.of(context).size.height * 0.75,
                   child: CustomPaint(painter: _sandDivider()),
                 ),
 
-                //stone for lil buddy
                 Positioned(
                   top: 500,
                   right: -10,
@@ -97,8 +103,9 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 490,
                   left: 75,
                   child: _emptySpot(
-                    topWidget: PlantBtn(),
-                    bottomWidget: _rock(),
+                    spotIndex: 0,
+                    plantData: _gardenSpots[0],
+                    onTap: _onSpotTapped,
                   ),
                 ),
 
@@ -106,8 +113,9 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 370,
                   left: 20,
                   child: _emptySpot(
-                    topWidget: PlantBtn(),
-                    bottomWidget: _rock(),
+                    spotIndex: 1,
+                    plantData: _gardenSpots[1],
+                    onTap: _onSpotTapped,
                   ),
                 ),
 
@@ -115,8 +123,9 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 250,
                   left: 5,
                   child: _emptySpot(
-                    topWidget: PlantBtn(),
-                    bottomWidget: _rock(),
+                    spotIndex: 2,
+                    plantData: _gardenSpots[2],
+                    onTap: _onSpotTapped,
                   ),
                 ),
 
@@ -124,8 +133,9 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 360,
                   right: 45,
                   child: _emptySpot(
-                    topWidget: PlantBtn(),
-                    bottomWidget: _rock(),
+                    spotIndex: 3,
+                    plantData: _gardenSpots[3],
+                    onTap: _onSpotTapped,
                   ),
                 ),
 
@@ -133,8 +143,9 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 160,
                   left: 85,
                   child: _emptySpot(
-                    topWidget: PlantBtn(),
-                    bottomWidget: _rock(),
+                    spotIndex: 4,
+                    plantData: _gardenSpots[4],
+                    onTap: _onSpotTapped,
                   ),
                 ),
 
@@ -142,8 +153,9 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 240,
                   right: 10,
                   child: _emptySpot(
-                    topWidget: PlantBtn(),
-                    bottomWidget: _rock(),
+                    spotIndex: 5,
+                    plantData: _gardenSpots[5],
+                    onTap: _onSpotTapped,
                   ),
                 ),
 
@@ -151,8 +163,9 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 130,
                   right: 15,
                   child: _emptySpot(
-                    topWidget: PlantBtn(),
-                    bottomWidget: _rock(),
+                    spotIndex: 6,
+                    plantData: _gardenSpots[6],
+                    onTap: _onSpotTapped,
                   ),
                 ),
 
@@ -160,8 +173,9 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 60,
                   left: 5,
                   child: _emptySpot(
-                    topWidget: PlantBtn(),
-                    bottomWidget: _rock(),
+                    spotIndex: 7,
+                    plantData: _gardenSpots[7],
+                    onTap: _onSpotTapped,
                   ),
                 ),
 
@@ -169,8 +183,9 @@ class _GardenScreenState extends State<GardenScreen> {
                   top: 20,
                   right: 10,
                   child: _emptySpot(
-                    topWidget: PlantBtn(),
-                    bottomWidget: _rock(),
+                    spotIndex: 8,
+                    plantData: _gardenSpots[8],
+                    onTap: _onSpotTapped,
                   ),
                 ),
               ],
@@ -180,7 +195,6 @@ class _GardenScreenState extends State<GardenScreen> {
           ],
         ),
       ),
-      // Bottom navigation bar
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -190,7 +204,8 @@ class _GardenScreenState extends State<GardenScreen> {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 24.0),
+          padding:
+              const EdgeInsets.symmetric(vertical: 10.0, horizontal: 24.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -222,7 +237,6 @@ class _GardenScreenState extends State<GardenScreen> {
   }
 }
 
-// Collaboration icon widget
 class _CollaborationIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -237,7 +251,6 @@ class _CollaborationIcon extends StatelessWidget {
   }
 }
 
-// Gloves icon widget
 class _GlovesIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -249,37 +262,46 @@ class _GlovesIcon extends StatelessWidget {
   }
 }
 
-class PlantBtn extends StatelessWidget {
-  const PlantBtn({super.key});
+class _emptySpot extends StatelessWidget {
+  final int spotIndex;
+  final Map<String, dynamic>? plantData;
+  final Function(int) onTap;
+
+  const _emptySpot({
+    super.key,
+    required this.spotIndex,
+    required this.plantData,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () async {
-        final selectedPlant = await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const CollectionScreen()),
-        );
-
-        if (selectedPlant != null) {
-          print("plant selected: ${selectedPlant['title']}");
-          //for add to garden
-        }
-      },
+      onTap: () => onTap(spotIndex),
       child: SizedBox(
-        width: 60,
-        height: 60,
+        width: 100,
+        height: 100,
         child: Column(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(100),
-              child: Image.asset(
-                'assets/icons/add_plant_icon.png',
-                height: 60,
-                width: 60,
-                fit: BoxFit.contain,
-              ),
-            ),
+            // Show plant image if selected, otherwise show add button
+            plantData != null
+                ? Image.asset(
+                    plantData!['imagePath'],
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.contain,
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(100),
+                    child: Image.asset(
+                      'assets/icons/add_plant_icon.png',
+                      height: 60,
+                      width: 60,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+            const SizedBox(height: 5),
+            _rock(),
           ],
         ),
       ),
@@ -287,7 +309,6 @@ class PlantBtn extends StatelessWidget {
   }
 }
 
-// rock widget
 class _rock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -295,28 +316,6 @@ class _rock extends StatelessWidget {
       width: 90,
       height: 30,
       child: Image.asset('assets/images/garden_rock.png', fit: BoxFit.contain),
-    );
-  }
-}
-
-class _emptySpot extends StatelessWidget {
-  final Widget topWidget;
-  final Widget bottomWidget;
-
-  const _emptySpot({
-    super.key,
-    required this.topWidget,
-    required this.bottomWidget,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 100,
-      height: 100,
-      child: Column(
-        children: [topWidget, const SizedBox(height: 5), bottomWidget],
-      ),
     );
   }
 }
@@ -339,18 +338,10 @@ class _sandDivider extends CustomPainter {
       ..color = const Color.fromARGB(255, 225, 205, 173)
       ..style = PaintingStyle.fill;
 
-    final borderPaint = Paint()
-      ..color = const Color.fromARGB(255, 91, 133, 56)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
     final path = Path();
 
     path.moveTo(size.width * 0, size.height * 0);
 
-    // ===== LEFT EDGE =====
     path.quadraticBezierTo(
       size.width * 0.45,
       size.height * 0.10,
@@ -387,12 +378,9 @@ class _sandDivider extends CustomPainter {
     );
 
     path.lineTo(size.width * 0.6, size.height * 1.6);
-
     path.lineTo(size.width * 0.6, size.height * 1.1);
-
     path.lineTo(size.width * 0.4, size.height * 1.1);
 
-    // ===== RIGHT EDGE =====
     path.quadraticBezierTo(
       size.width * 0.90,
       size.height * 0.98,
@@ -429,16 +417,13 @@ class _sandDivider extends CustomPainter {
     );
 
     path.close();
-
     canvas.drawPath(path, paint);
-    //canvas.drawPath(path, borderPaint);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// Navigation bar item
 class _NavBarItem extends StatelessWidget {
   final String imagePath;
   final bool isSelected;
@@ -460,7 +445,7 @@ class _NavBarItem extends StatelessWidget {
         padding: const EdgeInsets.all(5),
         child: Image.asset(
           imagePath,
-          color: isSelected ? Color(0xFF5A7C5A) : null,
+          color: isSelected ? const Color(0xFF5A7C5A) : null,
           fit: BoxFit.contain,
         ),
       ),

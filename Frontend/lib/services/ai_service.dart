@@ -5,9 +5,12 @@ class AIService {
   late final GenerativeModel _model;
 
   AIService() {
-    final firebaseAI = FirebaseAI.googleAI();
-    _model = firebaseAI.generativeModel(model: 'gemini-2.0-flash');
-  }
+  final firebaseAI = FirebaseAI.googleAI(appCheck: null);
+  _model = firebaseAI.generativeModel(
+    model: 'gemini-2.5-flash',
+    // use direct API key instead
+  );
+}
 
   Future<Map<String, dynamic>> analyzeEntry(String userEntry) async {
     final prompt = '''
@@ -35,6 +38,7 @@ Respond with JSON only. No extra text.
           .trim();
       return jsonDecode(cleaned) as Map<String, dynamic>;
     } catch (e) {
+      print('AI error: $e');
       return {
         'mood': 'neutral',
         'score': 0.0,

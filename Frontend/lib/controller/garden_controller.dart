@@ -5,4 +5,8 @@ class GardenController {
   GardenController._privateConstructor();
 
   Map<int, Map<String, dynamic>> spots = {};
+
+  void removePlantFromSpot(int spotIndex) {
+    spots.remove(spotIndex);
+  }
 }

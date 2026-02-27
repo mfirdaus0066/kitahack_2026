@@ -2,6 +2,7 @@ import 'package:arnima/main.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../services/journal_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,6 +16,11 @@ class _HomeScreenState extends State<HomeScreen> {
   String _lastMessage = '';
   final TextEditingController _textController = TextEditingController();
   int _selectedIndex = 1;
+
+  // AI-related state
+  final JournalService _journalService = JournalService();
+  bool _isAnalyzing = false;
+  String _aiConclusion = '';
 
   @override
   void initState() {
@@ -114,6 +120,29 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> _handleSubmit(String text) async {
+    if (text.isEmpty) return;
+
+    setState(() {
+      _lastMessage = text;
+      _textController.clear();
+      _isAnalyzing = true;
+      _aiConclusion = '';
+    });
+
+    try {
+      final result = await _journalService.submitJournalEntry(text);
+      print('AI Result: $result'); // check debug console
+      setState(() {
+        _isAnalyzing = false;
+        _aiConclusion = result['conclusion'] ?? '';
+      });
+    } catch (e) {
+      print('Error: $e');
+      setState(() => _isAnalyzing = false);
+    }
+  }
+
   @override
   void dispose() {
     _textController.dispose();
@@ -179,7 +208,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeInOut,
-                      height: _isExpanded ? 140 : 70,
+                      constraints: BoxConstraints(
+                        minHeight: _isExpanded ? 120 : 70,
+                        maxHeight: _isExpanded
+                            ? 300
+                            : 70, // changed from 150 to 300
+                      ),
                       decoration: BoxDecoration(
                         color: Theme.of(
                           context,
@@ -192,114 +226,147 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       clipBehavior: Clip.hardEdge,
                       child: _isExpanded
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    16,
-                                    12,
-                                    16,
-                                    8,
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'How is your day?',
-                                        style: const TextStyle(
-                                          color: Color(0xFF3B5D3B),
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: Text(
-                                          _lastMessage.isNotEmpty
-                                              ? _lastMessage
-                                              : 'user',
-                                          style: const TextStyle(
-                                            color: Color(0xFF2F4F3A),
+                          ? SingleChildScrollView(
+                              // added SingleChildScrollView
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      12,
+                                      16,
+                                      4,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'How is your day?',
+                                          style: TextStyle(
+                                            color: Color(0xFF3B5D3B),
                                             fontSize: 13,
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    8,
-                                    0,
-                                    8,
-                                    8,
-                                  ),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFA8C3B5),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: TextField(
-                                            controller: _textController,
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: Text(
+                                            _lastMessage.isNotEmpty
+                                                ? _lastMessage
+                                                : '',
                                             style: const TextStyle(
                                               color: Color(0xFF2F4F3A),
                                               fontSize: 13,
                                             ),
-                                            decoration: const InputDecoration(
-                                              hintText: 'user input',
-                                              hintStyle: TextStyle(
-                                                color: Color(0xFF3B5D3B),
-                                                fontSize: 13,
-                                              ),
-                                              border: InputBorder.none,
-                                              contentPadding:
-                                                  EdgeInsets.symmetric(
-                                                    horizontal: 16,
-                                                    vertical: 12,
-                                                  ),
-                                            ),
-                                            onSubmitted: (value) {
-                                              if (value.isNotEmpty) {
-                                                setState(() {
-                                                  _lastMessage = value;
-                                                  _textController.clear();
-                                                });
-                                              }
-                                            },
                                           ),
                                         ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            if (_textController
-                                                .text
-                                                .isNotEmpty) {
-                                              setState(() {
-                                                _lastMessage =
-                                                    _textController.text;
-                                                _textController.clear();
-                                              });
-                                            }
-                                          },
-                                          child: const Padding(
-                                            padding: EdgeInsets.only(right: 20),
+                                        // Show AI conclusion or loading
+                                        if (_isAnalyzing)
+                                          const Padding(
+                                            padding: EdgeInsets.only(top: 4),
+                                            child: LinearProgressIndicator(
+                                              color: Color(0xFF20854F),
+                                              backgroundColor: Color(
+                                                0xFFB8CFAF,
+                                              ),
+                                            ),
+                                          ),
+                                        if (_aiConclusion.isNotEmpty &&
+                                            !_isAnalyzing)
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 4,
+                                            ),
                                             child: Text(
-                                              '>',
-                                              style: TextStyle(
-                                                color: Color(0xFF3B5D3B),
-                                                fontSize: 18,
+                                              _aiConclusion,
+                                              style: const TextStyle(
+                                                color: Color(0xFF20854F),
+                                                fontSize: 12,
+                                                fontStyle: FontStyle.italic,
                                               ),
                                             ),
                                           ),
-                                        ),
                                       ],
                                     ),
                                   ),
-                                ),
-                              ],
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      8,
+                                      0,
+                                      8,
+                                      8,
+                                    ),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFA8C3B5),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: SizedBox(
+                                        height: 30,
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: TextField(
+                                                controller: _textController,
+                                                maxLines: 1,
+                                                textAlignVertical:
+                                                    TextAlignVertical.center,
+                                                style: const TextStyle(
+                                                  color: Color(0xFF2F4F3A),
+                                                  fontSize: 12,
+                                                ),
+                                                decoration: const InputDecoration(
+                                                  hintText:
+                                                      'Tell me about your day...',
+                                                  hintStyle: TextStyle(
+                                                    color: Color(0xFF3B5D3B),
+                                                    fontSize: 13,
+                                                  ),
+                                                  border: InputBorder.none,
+                                                  isCollapsed: true,
+                                                  contentPadding:
+                                                      EdgeInsets.symmetric(
+                                                        horizontal: 16,
+                                                        vertical: 6,
+                                                      ),
+                                                ),
+                                                onSubmitted: (value) {
+                                                  if (value.isNotEmpty) {
+                                                    _handleSubmit(value);
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                            GestureDetector(
+                                              onTap: () {
+                                                if (_textController
+                                                    .text
+                                                    .isNotEmpty) {
+                                                  _handleSubmit(
+                                                    _textController.text,
+                                                  );
+                                                }
+                                              },
+                                              child: const Padding(
+                                                padding: EdgeInsets.only(
+                                                  right: 20,
+                                                ),
+                                                child: Icon(
+                                                  Icons
+                                                      .arrow_circle_right_outlined,
+                                                  color: Color(0xFF3B5D3B),
+                                                  size: 24,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             )
                           : const Padding(
                               padding: EdgeInsets.symmetric(
@@ -327,8 +394,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-
-            const Spacer(flex: 2),
 
             // Plant of the week
             FutureBuilder<DocumentSnapshot>(
@@ -377,7 +442,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         SizedBox(
                           width: 240,
-                          height: 270,
+                          height: 250,
                           child: Stack(
                             children: [
                               Positioned(

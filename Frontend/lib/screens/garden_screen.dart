@@ -12,14 +12,30 @@ class GardenScreen extends StatefulWidget {
 
 class _GardenScreenState extends State<GardenScreen> {
   int _selectedIndex = 0;
-  // Only store plantId per spot
   final Map<int, String> _gardenSpots = {};
   bool isDeleteMode = false;
+  String _currentMood = 'neutral';
 
   @override
   void initState() {
     super.initState();
     _loadGardenSpots();
+    _loadCurrentMood();
+  }
+
+  Future<void> _loadCurrentMood() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+
+    final mood = userDoc.data()?['currentMood'] ?? 'neutral';
+    setState(() {
+      _currentMood = mood;
+    });
   }
 
   Future<void> _loadGardenSpots() async {
@@ -57,6 +73,18 @@ class _GardenScreenState extends State<GardenScreen> {
         .set({'plantId': plantId});
   }
 
+  Future<void> _deleteSpotFromFirestore(int spotIndex) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('gardenSpots')
+        .doc(spotIndex.toString())
+        .delete();
+  }
+
   void _onNavItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -81,7 +109,6 @@ class _GardenScreenState extends State<GardenScreen> {
     if (_gardenSpots.containsKey(spotIndex)) {
       final plantId = _gardenSpots[spotIndex]!;
 
-      // Fetch latest plant data from plants collection
       final plantDoc = await FirebaseFirestore.instance
           .collection('plants')
           .doc(plantId)
@@ -90,8 +117,9 @@ class _GardenScreenState extends State<GardenScreen> {
       if (!plantDoc.exists) return;
 
       final plantName = plantDoc['name'] ?? 'Plant';
-      final imagePath =
-          plantDoc['goodImagePath'] ?? 'assets/images/plant_sample.png';
+      final imagePath = _currentMood == 'sad'
+          ? (plantDoc['badImagePath'] ?? 'assets/images/plant_sample.png')
+          : (plantDoc['goodImagePath'] ?? 'assets/images/plant_sample.png');
 
       if (!mounted) return;
 
@@ -101,9 +129,8 @@ class _GardenScreenState extends State<GardenScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          backgroundColor: Theme.of(
-            context,
-          ).colorScheme.surfaceContainerHighest,
+          backgroundColor:
+              Theme.of(context).colorScheme.surfaceContainerHighest,
           title: Text(
             plantName,
             style: const TextStyle(
@@ -226,16 +253,10 @@ class _GardenScreenState extends State<GardenScreen> {
                     plantId: _gardenSpots[0],
                     onTap: _onSpotTapped,
                     isDeleteMode: isDeleteMode,
+                    currentMood: _currentMood,
                     onDelete: () async {
-                      final userDoc = FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(FirebaseAuth.instance.currentUser?.uid)
-                          .collection('gardenSpots')
-                          .doc('0')
-                          .delete();
-                      setState(() {
-                        _gardenSpots.remove(0);
-                      });
+                      await _deleteSpotFromFirestore(0);
+                      setState(() => _gardenSpots.remove(0));
                     },
                   ),
                 ),
@@ -247,16 +268,10 @@ class _GardenScreenState extends State<GardenScreen> {
                     plantId: _gardenSpots[1],
                     onTap: _onSpotTapped,
                     isDeleteMode: isDeleteMode,
+                    currentMood: _currentMood,
                     onDelete: () async {
-                      final userDoc = FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(FirebaseAuth.instance.currentUser?.uid)
-                          .collection('gardenSpots')
-                          .doc('1')
-                          .delete();
-                      setState(() {
-                        _gardenSpots.remove(1);
-                      });
+                      await _deleteSpotFromFirestore(1);
+                      setState(() => _gardenSpots.remove(1));
                     },
                   ),
                 ),
@@ -268,16 +283,10 @@ class _GardenScreenState extends State<GardenScreen> {
                     plantId: _gardenSpots[2],
                     onTap: _onSpotTapped,
                     isDeleteMode: isDeleteMode,
+                    currentMood: _currentMood,
                     onDelete: () async {
-                      final userDoc = FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(FirebaseAuth.instance.currentUser?.uid)
-                          .collection('gardenSpots')
-                          .doc('2')
-                          .delete();
-                      setState(() {
-                        _gardenSpots.remove(2);
-                      });
+                      await _deleteSpotFromFirestore(2);
+                      setState(() => _gardenSpots.remove(2));
                     },
                   ),
                 ),
@@ -289,16 +298,10 @@ class _GardenScreenState extends State<GardenScreen> {
                     plantId: _gardenSpots[3],
                     onTap: _onSpotTapped,
                     isDeleteMode: isDeleteMode,
+                    currentMood: _currentMood,
                     onDelete: () async {
-                      final userDoc = FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(FirebaseAuth.instance.currentUser?.uid)
-                          .collection('gardenSpots')
-                          .doc('3')
-                          .delete();
-                      setState(() {
-                        _gardenSpots.remove(3);
-                      });
+                      await _deleteSpotFromFirestore(3);
+                      setState(() => _gardenSpots.remove(3));
                     },
                   ),
                 ),
@@ -310,16 +313,10 @@ class _GardenScreenState extends State<GardenScreen> {
                     plantId: _gardenSpots[4],
                     onTap: _onSpotTapped,
                     isDeleteMode: isDeleteMode,
+                    currentMood: _currentMood,
                     onDelete: () async {
-                      final userDoc = FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(FirebaseAuth.instance.currentUser?.uid)
-                          .collection('gardenSpots')
-                          .doc('4')
-                          .delete();
-                      setState(() {
-                        _gardenSpots.remove(4);
-                      });
+                      await _deleteSpotFromFirestore(4);
+                      setState(() => _gardenSpots.remove(4));
                     },
                   ),
                 ),
@@ -331,16 +328,10 @@ class _GardenScreenState extends State<GardenScreen> {
                     plantId: _gardenSpots[5],
                     onTap: _onSpotTapped,
                     isDeleteMode: isDeleteMode,
+                    currentMood: _currentMood,
                     onDelete: () async {
-                      final userDoc = FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(FirebaseAuth.instance.currentUser?.uid)
-                          .collection('gardenSpots')
-                          .doc('5')
-                          .delete();
-                      setState(() {
-                        _gardenSpots.remove(5);
-                      });
+                      await _deleteSpotFromFirestore(5);
+                      setState(() => _gardenSpots.remove(5));
                     },
                   ),
                 ),
@@ -352,16 +343,10 @@ class _GardenScreenState extends State<GardenScreen> {
                     plantId: _gardenSpots[6],
                     onTap: _onSpotTapped,
                     isDeleteMode: isDeleteMode,
+                    currentMood: _currentMood,
                     onDelete: () async {
-                      final userDoc = FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(FirebaseAuth.instance.currentUser?.uid)
-                          .collection('gardenSpots')
-                          .doc('6')
-                          .delete();
-                      setState(() {
-                        _gardenSpots.remove(6);
-                      });
+                      await _deleteSpotFromFirestore(6);
+                      setState(() => _gardenSpots.remove(6));
                     },
                   ),
                 ),
@@ -373,16 +358,10 @@ class _GardenScreenState extends State<GardenScreen> {
                     plantId: _gardenSpots[7],
                     onTap: _onSpotTapped,
                     isDeleteMode: isDeleteMode,
+                    currentMood: _currentMood,
                     onDelete: () async {
-                      final userDoc = FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(FirebaseAuth.instance.currentUser?.uid)
-                          .collection('gardenSpots')
-                          .doc('7')
-                          .delete();
-                      setState(() {
-                        _gardenSpots.remove(7);
-                      });
+                      await _deleteSpotFromFirestore(7);
+                      setState(() => _gardenSpots.remove(7));
                     },
                   ),
                 ),
@@ -394,17 +373,10 @@ class _GardenScreenState extends State<GardenScreen> {
                     plantId: _gardenSpots[8],
                     onTap: _onSpotTapped,
                     isDeleteMode: isDeleteMode,
+                    currentMood: _currentMood,
                     onDelete: () async {
-                      final userDoc = FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(FirebaseAuth.instance.currentUser?.uid)
-                          .collection('gardenSpots')
-                          .doc('8')
-                          .delete();
-
-                      setState(() {
-                        _gardenSpots.remove(8);
-                      });
+                      await _deleteSpotFromFirestore(8);
+                      setState(() => _gardenSpots.remove(8));
                     },
                   ),
                 ),
@@ -416,17 +388,10 @@ class _GardenScreenState extends State<GardenScreen> {
                     plantId: _gardenSpots[9],
                     onTap: _onSpotTapped,
                     isDeleteMode: isDeleteMode,
+                    currentMood: _currentMood,
                     onDelete: () async {
-                      final userDoc = FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(FirebaseAuth.instance.currentUser?.uid)
-                          .collection('gardenSpots')
-                          .doc('9')
-                          .delete();
-
-                      setState(() {
-                        _gardenSpots.remove(9);
-                      });
+                      await _deleteSpotFromFirestore(9);
+                      setState(() => _gardenSpots.remove(9));
                     },
                   ),
                 ),
@@ -446,7 +411,8 @@ class _GardenScreenState extends State<GardenScreen> {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 24.0),
+          padding:
+              const EdgeInsets.symmetric(vertical: 10.0, horizontal: 24.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -509,7 +475,11 @@ class _GlovesIcon extends StatelessWidget {
       child: SizedBox(
         width: 60,
         height: 60,
-        child: Image.asset('assets/icons/gloves_icon.png', fit: BoxFit.contain),
+        child: Image.asset(
+          'assets/icons/gloves_icon.png',
+          fit: BoxFit.contain,
+          color: isDeleteMode ? const Color(0xFF5A7C5A) : null,
+        ),
       ),
     );
   }
@@ -520,6 +490,7 @@ class _emptySpot extends StatelessWidget {
   final String? plantId;
   final Function(int) onTap;
   final bool isDeleteMode;
+  final String currentMood;
   final VoidCallback onDelete;
 
   const _emptySpot({
@@ -528,6 +499,7 @@ class _emptySpot extends StatelessWidget {
     required this.plantId,
     required this.onTap,
     required this.isDeleteMode,
+    required this.currentMood,
     required this.onDelete,
   });
 
@@ -550,9 +522,13 @@ class _emptySpot extends StatelessWidget {
                       if (!snapshot.hasData) {
                         return const SizedBox(width: 65, height: 65);
                       }
-                      final imagePath =
-                          snapshot.data!['goodImagePath'] ??
-                          'assets/images/plant_sample.png';
+                      // Switch image based on mood
+                      final imagePath = currentMood == 'sad'
+                          ? (snapshot.data!['badImagePath'] ??
+                              'assets/images/plant_sample.png')
+                          : (snapshot.data!['goodImagePath'] ??
+                              'assets/images/plant_sample.png');
+
                       return SizedBox(
                         width: 65,
                         height: 65,
@@ -564,7 +540,6 @@ class _emptySpot extends StatelessWidget {
                               height: 65,
                               fit: BoxFit.contain,
                             ),
-
                             if (isDeleteMode)
                               Positioned(
                                 top: 0,
@@ -614,7 +589,8 @@ class _rock extends StatelessWidget {
     return SizedBox(
       width: 90,
       height: 30,
-      child: Image.asset('assets/images/garden_rock.png', fit: BoxFit.contain),
+      child:
+          Image.asset('assets/images/garden_rock.png', fit: BoxFit.contain),
     );
   }
 }

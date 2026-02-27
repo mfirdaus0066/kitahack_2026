@@ -26,10 +26,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadAndShowPopupIfNeeded();
-      _checkTodayResponse();
-      _loadCurrentMood();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadCurrentMood();
+      await _checkTodayResponse();
+      await _loadAndShowPopupIfNeeded();
     });
   }
 
@@ -97,9 +97,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final plantAssignedAt =
         (data['plantAssignedAt'] as Timestamp?)?.toDate();
-    final popupShownAt = (data['popupShownAt'] as Timestamp?)?.toDate();
+    final popupShownAt =
+        (data['popupShownAt'] as Timestamp?)?.toDate();
 
     if (plantAssignedAt == null) return;
+
+    // Show weekly report popup first if there's a new one
+    await _checkAndShowWeeklyReport(uid, plantAssignedAt, popupShownAt);
+
     if (popupShownAt != null && !plantAssignedAt.isAfter(popupShownAt))
       return;
 
@@ -123,12 +128,271 @@ class _HomeScreenState extends State<HomeScreen> {
     _showWeeklyPlantPopup(plantName, imagePath);
   }
 
+  Future<void> _checkAndShowWeeklyReport(
+    String uid,
+    DateTime plantAssignedAt,
+    DateTime? popupShownAt,
+  ) async {
+    // Only show if this is a new plant assignment
+    if (popupShownAt != null && !plantAssignedAt.isAfter(popupShownAt))
+      return;
+
+    // Find the most recent weekly report
+    final reportsSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('weeklyReports')
+        .orderBy('generatedAt', descending: true)
+        .limit(1)
+        .get();
+
+    if (reportsSnapshot.docs.isEmpty) return;
+
+    final report = reportsSnapshot.docs.first.data();
+
+    // Check if this report has already been shown
+    final reportShownAt =
+        (report['shownAt'] as Timestamp?)?.toDate();
+    final generatedAt =
+        (report['generatedAt'] as Timestamp?)?.toDate();
+
+    if (generatedAt == null) return;
+    if (reportShownAt != null && reportShownAt.isAfter(generatedAt))
+      return;
+
+    // Mark report as shown
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('weeklyReports')
+        .doc(reportsSnapshot.docs.first.id)
+        .update({'shownAt': FieldValue.serverTimestamp()});
+
+    if (!mounted) return;
+    await _showWeeklyReportPopup(report);
+  }
+
+  Future<void> _showWeeklyReportPopup(
+      Map<String, dynamic> report) async {
+    final aiSummary = report['aiSummary'] ?? '';
+    final totalDays = report['totalDaysResponded'] ?? 0;
+    final goodDays = report['goodDays'] ?? 0;
+    final badDays = report['badDays'] ?? 0;
+    final overallMood = report['overallMood'] ?? 'mixed';
+    final entries =
+        List<Map<String, dynamic>>.from(report['entries'] ?? []);
+
+    final weekStart =
+        (report['weekStart'] as Timestamp?)?.toDate();
+    final weekEnd = (report['weekEnd'] as Timestamp?)?.toDate();
+
+    String weekRange = '';
+    if (weekStart != null && weekEnd != null) {
+      weekRange =
+          '${weekStart.day} ${_monthName(weekStart.month)} — ${weekEnd.day} ${_monthName(weekEnd.month)}';
+    }
+
+    String moodBadge = '🌤 Mixed Week';
+    if (overallMood == 'good') moodBadge = '🌿 Good Week';
+    if (overallMood == 'bad') moodBadge = '🌧 Tough Week';
+
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        backgroundColor:
+            Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        moodBadge,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF20854F),
+                        ),
+                      ),
+                      if (weekRange.isNotEmpty)
+                        Text(
+                          weekRange,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF5A7C5A),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // AI Summary
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFB8CFAF),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    aiSummary,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF2F4F3A),
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Stats row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _statChip('😊', '$goodDays', 'Good'),
+                    _statChip('😔', '$badDays', 'Tough'),
+                    _statChip('📝', '$totalDays/7', 'Days'),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                // Daily entries
+                if (entries.isNotEmpty) ...[
+                  const Text(
+                    'This week',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF3B5D3B),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ...entries.map((entry) {
+                    final mood = entry['mood'] ?? 'neutral';
+                    final moodEmoji =
+                        mood == 'happy' ? '😊' : mood == 'sad' ? '😔' : '😐';
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFA8C3B5),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                moodEmoji,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                entry['date'] ?? '',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF3B5D3B),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            entry['userMessage'] ?? '',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF2F4F3A),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            entry['aiResponse'] ?? '',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF5A7C5A),
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ],
+
+                const SizedBox(height: 8),
+
+                Center(
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text(
+                      'Thanks! 🌱',
+                      style: TextStyle(
+                        color: Color(0xFF20854F),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _statChip(String emoji, String value, String label) {
+    return Column(
+      children: [
+        Text(emoji, style: const TextStyle(fontSize: 20)),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF20854F),
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 11, color: Color(0xFF5A7C5A)),
+        ),
+      ],
+    );
+  }
+
+  String _monthName(int month) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return months[month - 1];
+  }
+
   void _showWeeklyPlantPopup(String plantName, String imagePath) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16)),
         backgroundColor:
             Theme.of(context).colorScheme.surfaceContainerHighest,
         content: Column(
@@ -174,8 +438,8 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16)),
         backgroundColor:
             Theme.of(context).colorScheme.surfaceContainerHighest,
         content: Column(
@@ -193,7 +457,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'You\'ve already shared your thoughts today.',
+              'You\'ve already shared your thoughts today. Your plant is happy!',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 13, color: Color(0xFF5A7C5A)),
             ),
@@ -358,7 +622,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                           const Padding(
                                             padding:
                                                 EdgeInsets.only(top: 4),
-                                            child: LinearProgressIndicator(
+                                            child:
+                                                LinearProgressIndicator(
                                               color: Color(0xFF20854F),
                                               backgroundColor:
                                                   Color(0xFFB8CFAF),
@@ -483,7 +748,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Text(
                                 'Tell me about your day',
                                 style: TextStyle(
-                                    color: Color(0xFF3B5D3B), fontSize: 13),
+                                    color: Color(0xFF3B5D3B),
+                                    fontSize: 13),
                               ),
                             ),
                     ),
@@ -500,7 +766,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // Plant of the week — switches image based on mood
+            // Plant of the week
             FutureBuilder<DocumentSnapshot>(
               future: FirebaseFirestore.instance
                   .collection('users')
@@ -540,8 +806,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
 
                     final plant = plantSnapshot.data!;
-
-                    // Switch image based on current mood
                     final imagePath = _currentMood == 'sad'
                         ? (plant['badImagePath'] ??
                             'assets/images/plant_sample.png')
@@ -675,8 +939,8 @@ class _plantTable extends StatelessWidget {
         children: [
           Positioned(
             bottom: 0,
-            child:
-                Image.asset('assets/images/table.png', fit: BoxFit.contain),
+            child: Image.asset('assets/images/table.png',
+                fit: BoxFit.contain),
           ),
         ],
       ),

@@ -245,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         const Text(
                                           'How is your day?',
                                           style: TextStyle(
-                                            color: Color(0xFF3B5D3B),
+                                            color: Color(0xFF20854F),
                                             fontSize: 13,
                                           ),
                                         ),
@@ -256,7 +256,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ? _lastMessage
                                                 : '',
                                             style: const TextStyle(
-                                              color: Color(0xFF2F4F3A),
+                                              color: Color.fromARGB(
+                                                255,
+                                                90,
+                                                180,
+                                                90,
+                                              ),
                                               fontSize: 13,
                                             ),
                                           ),
@@ -376,7 +381,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Text(
                                 'Tell me about your day',
                                 style: TextStyle(
-                                  color: Color(0xFF3B5D3B),
+                                  color: Color.fromARGB(255, 90, 180, 90),
                                   fontSize: 13,
                                 ),
                               ),

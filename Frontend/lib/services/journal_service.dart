@@ -11,12 +11,10 @@ class JournalService {
     final uid = _auth.currentUser?.uid;
     if (uid == null) throw Exception('User not logged in');
 
-    // 1. Get currentPlantId from user doc
     final userDoc = await _firestore.collection('users').doc(uid).get();
     final currentPlantId = userDoc.data()?['currentPlantId'];
     if (currentPlantId == null) throw Exception('No plant assigned this week');
 
-    // 2. Find the matching userPlant document
     final userPlantsQuery = await _firestore
         .collection('users')
         .doc(uid)
@@ -28,12 +26,11 @@ class JournalService {
     if (userPlantsQuery.docs.isEmpty) throw Exception('User plant not found');
     final userPlantDocId = userPlantsQuery.docs.first.id;
 
-    // 3. Use today's date as document ID (one entry per day)
     final today = DateTime.now();
     final dateKey =
         '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
 
-    // 4. Save entry immediately with 'analyzing' status
+    // Save to dailyStates under userPlants
     final dailyRef = _firestore
         .collection('users')
         .doc(uid)
@@ -48,10 +45,10 @@ class JournalService {
       'status': 'analyzing',
     });
 
-    // 5. Call AI to analyze
+    // Call AI
     final aiResult = await _aiService.analyzeEntry(entry);
 
-    // 6. Update with AI result
+    // Update dailyStates
     await dailyRef.update({
       'mood': aiResult['mood'],
       'score': aiResult['score'],
@@ -60,7 +57,21 @@ class JournalService {
       'status': 'done',
     });
 
-    // 7. Also update the user's currentMood for plant appearance
+    // Also save to dailyResponses for weekly report
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('dailyResponses')
+        .doc(dateKey)
+        .set({
+      'userMessage': entry,
+      'aiResponse': aiResult['conclusion'] ?? '',
+      'mood': aiResult['mood'] ?? 'neutral',
+      'plantId': currentPlantId,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    // Update currentMood for plant appearance
     await _firestore.collection('users').doc(uid).update({
       'currentMood': aiResult['mood'],
     });
@@ -68,7 +79,6 @@ class JournalService {
     return aiResult;
   }
 
-  // Fetch all daily states for current week's plant
   Future<List<Map<String, dynamic>>> getWeeklyEntries() async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return [];
@@ -98,5 +108,32 @@ class JournalService {
         .get();
 
     return dailyStates.docs.map((doc) => doc.data()).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getDailyResponsesForWeek(
+      DateTime weekStart, DateTime weekEnd) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return [];
+
+    final snapshot = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('dailyResponses')
+        .get();
+
+    return snapshot.docs
+        .where((doc) {
+          final createdAt =
+              (doc.data()['createdAt'] as Timestamp?)?.toDate();
+          if (createdAt == null) return false;
+          return createdAt.isAfter(weekStart) && createdAt.isBefore(weekEnd);
+        })
+        .map((doc) => {
+              'date': doc.id,
+              'userMessage': doc.data()['userMessage'] ?? '',
+              'aiResponse': doc.data()['aiResponse'] ?? '',
+              'mood': doc.data()['mood'] ?? 'neutral',
+            })
+        .toList();
   }
 }

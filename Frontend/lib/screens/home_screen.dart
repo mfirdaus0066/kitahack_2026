@@ -17,17 +17,67 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _textController = TextEditingController();
   int _selectedIndex = 1;
 
-  // AI-related state
   final JournalService _journalService = JournalService();
   bool _isAnalyzing = false;
   String _aiConclusion = '';
+  bool _hasRespondedToday = false;
+  String _currentMood = 'neutral';
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadAndShowPopupIfNeeded();
+      _checkTodayResponse();
+      _loadCurrentMood();
     });
+  }
+
+  Future<void> _loadCurrentMood() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+
+    final mood = userDoc.data()?['currentMood'] ?? 'neutral';
+    setState(() {
+      _currentMood = mood;
+    });
+  }
+
+  Future<void> _checkTodayResponse() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+
+    final currentPlantId = userDoc.data()?['currentPlantId'];
+    if (currentPlantId == null) return;
+
+    final today = DateTime.now();
+    final todayStr =
+        '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+
+    final existing = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('dailyResponses')
+        .doc(todayStr)
+        .get();
+
+    if (existing.exists) {
+      setState(() {
+        _hasRespondedToday = true;
+        _lastMessage = existing.data()?['userMessage'] ?? '';
+        _aiConclusion = existing.data()?['aiResponse'] ?? '';
+      });
+    }
   }
 
   Future<void> _loadAndShowPopupIfNeeded() async {
@@ -45,11 +95,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final currentPlantId = data['currentPlantId'];
     if (currentPlantId == null) return;
 
-    final plantAssignedAt = (data['plantAssignedAt'] as Timestamp?)?.toDate();
+    final plantAssignedAt =
+        (data['plantAssignedAt'] as Timestamp?)?.toDate();
     final popupShownAt = (data['popupShownAt'] as Timestamp?)?.toDate();
 
     if (plantAssignedAt == null) return;
-    if (popupShownAt != null && !plantAssignedAt.isAfter(popupShownAt)) return;
+    if (popupShownAt != null && !plantAssignedAt.isAfter(popupShownAt))
+      return;
 
     final plantDoc = await FirebaseFirestore.instance
         .collection('plants')
@@ -62,9 +114,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final imagePath =
         plantDoc['goodImagePath'] ?? 'assets/images/plant_sample.png';
 
-    await FirebaseFirestore.instance.collection('users').doc(uid).update({
-      'popupShownAt': FieldValue.serverTimestamp(),
-    });
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .update({'popupShownAt': FieldValue.serverTimestamp()});
 
     if (!mounted) return;
     _showWeeklyPlantPopup(plantName, imagePath);
@@ -74,18 +127,16 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor:
+            Theme.of(context).colorScheme.surfaceContainerHighest,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Image.asset(
-              imagePath,
-              width: 100,
-              height: 100,
-              fit: BoxFit.contain,
-            ),
+            Image.asset(imagePath,
+                width: 100, height: 100, fit: BoxFit.contain),
             const SizedBox(height: 12),
             const Text(
               'This week you got',
@@ -109,9 +160,54 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Text(
                 'Yay!',
                 style: TextStyle(
-                  color: Color(0xFF20854F),
-                  fontWeight: FontWeight.bold,
-                ),
+                    color: Color(0xFF20854F),
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAlreadyRespondedPopup() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor:
+            Theme.of(context).colorScheme.surfaceContainerHighest,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('🌿', style: TextStyle(fontSize: 40)),
+            const SizedBox(height: 12),
+            const Text(
+              'Come back tomorrow!',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF20854F),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'You\'ve already shared your thoughts today. Your plant is happy!',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: Color(0xFF5A7C5A)),
+            ),
+          ],
+        ),
+        actions: [
+          Center(
+            child: TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'OK',
+                style: TextStyle(
+                    color: Color(0xFF20854F),
+                    fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -123,6 +219,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _handleSubmit(String text) async {
     if (text.isEmpty) return;
 
+    if (_hasRespondedToday) {
+      _showAlreadyRespondedPopup();
+      return;
+    }
+
     setState(() {
       _lastMessage = text;
       _textController.clear();
@@ -132,10 +233,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final result = await _journalService.submitJournalEntry(text);
-      print('AI Result: $result'); // check debug console
+      final aiResponse = result['conclusion'] ?? '';
+      final mood = result['mood'] ?? 'neutral';
+
       setState(() {
         _isAnalyzing = false;
-        _aiConclusion = result['conclusion'] ?? '';
+        _aiConclusion = aiResponse;
+        _hasRespondedToday = true;
+        _currentMood = mood;
       });
     } catch (e) {
       print('Error: $e');
@@ -183,9 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      MyApp.of(context).toggleTheme();
-                    },
+                    onTap: () => MyApp.of(context).toggleTheme(),
                     child: _SunIcon(),
                   ),
                   _WateringCanIcon(),
@@ -210,34 +313,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       curve: Curves.easeInOut,
                       constraints: BoxConstraints(
                         minHeight: _isExpanded ? 120 : 70,
-                        maxHeight: _isExpanded
-                            ? 300
-                            : 70, // changed from 150 to 300
+                        maxHeight: _isExpanded ? 300 : 70,
                       ),
                       decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: const Color(0xFFB8CFAF),
-                          width: 6,
-                        ),
+                            color: const Color(0xFFB8CFAF), width: 6),
                       ),
                       clipBehavior: Clip.hardEdge,
                       child: _isExpanded
                           ? SingleChildScrollView(
-                              // added SingleChildScrollView
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.stretch,
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.fromLTRB(
-                                      16,
-                                      12,
-                                      16,
-                                      4,
-                                    ),
+                                        16, 12, 16, 4),
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -245,9 +340,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         const Text(
                                           'How is your day?',
                                           style: TextStyle(
-                                            color: Color(0xFF3B5D3B),
-                                            fontSize: 13,
-                                          ),
+                                              color: Color(0xFF3B5D3B),
+                                              fontSize: 13),
                                         ),
                                         Align(
                                           alignment: Alignment.centerRight,
@@ -256,28 +350,25 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ? _lastMessage
                                                 : '',
                                             style: const TextStyle(
-                                              color: Color(0xFF2F4F3A),
-                                              fontSize: 13,
-                                            ),
+                                                color: Color(0xFF2F4F3A),
+                                                fontSize: 13),
                                           ),
                                         ),
-                                        // Show AI conclusion or loading
                                         if (_isAnalyzing)
                                           const Padding(
-                                            padding: EdgeInsets.only(top: 4),
+                                            padding:
+                                                EdgeInsets.only(top: 4),
                                             child: LinearProgressIndicator(
                                               color: Color(0xFF20854F),
-                                              backgroundColor: Color(
-                                                0xFFB8CFAF,
-                                              ),
+                                              backgroundColor:
+                                                  Color(0xFFB8CFAF),
                                             ),
                                           ),
                                         if (_aiConclusion.isNotEmpty &&
                                             !_isAnalyzing)
                                           Padding(
                                             padding: const EdgeInsets.only(
-                                              top: 4,
-                                            ),
+                                                top: 4),
                                             child: Text(
                                               _aiConclusion,
                                               style: const TextStyle(
@@ -290,95 +381,109 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ],
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                      8,
-                                      0,
-                                      8,
-                                      8,
-                                    ),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFA8C3B5),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: SizedBox(
-                                        height: 30,
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                              child: TextField(
-                                                controller: _textController,
-                                                maxLines: 1,
-                                                textAlignVertical:
-                                                    TextAlignVertical.center,
-                                                style: const TextStyle(
-                                                  color: Color(0xFF2F4F3A),
-                                                  fontSize: 12,
-                                                ),
-                                                decoration: const InputDecoration(
-                                                  hintText:
-                                                      'Tell me about your day...',
-                                                  hintStyle: TextStyle(
-                                                    color: Color(0xFF3B5D3B),
-                                                    fontSize: 13,
+                                  if (!_hasRespondedToday)
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          8, 0, 8, 8),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFA8C3B5),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: SizedBox(
+                                          height: 30,
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: TextField(
+                                                  controller:
+                                                      _textController,
+                                                  maxLines: 1,
+                                                  textAlignVertical:
+                                                      TextAlignVertical
+                                                          .center,
+                                                  style: const TextStyle(
+                                                    color:
+                                                        Color(0xFF2F4F3A),
+                                                    fontSize: 12,
                                                   ),
-                                                  border: InputBorder.none,
-                                                  isCollapsed: true,
-                                                  contentPadding:
-                                                      EdgeInsets.symmetric(
-                                                        horizontal: 16,
-                                                        vertical: 6,
-                                                      ),
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    hintText:
+                                                        'Tell me about your day...',
+                                                    hintStyle: TextStyle(
+                                                      color:
+                                                          Color(0xFF3B5D3B),
+                                                      fontSize: 13,
+                                                    ),
+                                                    border:
+                                                        InputBorder.none,
+                                                    isCollapsed: true,
+                                                    contentPadding:
+                                                        EdgeInsets.symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 6,
+                                                    ),
+                                                  ),
+                                                  onSubmitted: (value) {
+                                                    if (value.isNotEmpty) {
+                                                      _handleSubmit(value);
+                                                    }
+                                                  },
                                                 ),
-                                                onSubmitted: (value) {
-                                                  if (value.isNotEmpty) {
-                                                    _handleSubmit(value);
+                                              ),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  if (_textController
+                                                      .text.isNotEmpty) {
+                                                    _handleSubmit(
+                                                        _textController
+                                                            .text);
                                                   }
                                                 },
-                                              ),
-                                            ),
-                                            GestureDetector(
-                                              onTap: () {
-                                                if (_textController
-                                                    .text
-                                                    .isNotEmpty) {
-                                                  _handleSubmit(
-                                                    _textController.text,
-                                                  );
-                                                }
-                                              },
-                                              child: const Padding(
-                                                padding: EdgeInsets.only(
-                                                  right: 20,
-                                                ),
-                                                child: Icon(
-                                                  Icons
-                                                      .arrow_circle_right_outlined,
-                                                  color: Color(0xFF3B5D3B),
-                                                  size: 24,
+                                                child: const Padding(
+                                                  padding: EdgeInsets.only(
+                                                      right: 20),
+                                                  child: Icon(
+                                                    Icons
+                                                        .arrow_circle_right_outlined,
+                                                    color:
+                                                        Color(0xFF3B5D3B),
+                                                    size: 24,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
+                                  if (_hasRespondedToday)
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          8, 0, 8, 8),
+                                      child: Center(
+                                        child: Text(
+                                          'Come back tomorrow 🌿',
+                                          style: const TextStyle(
+                                            color: Color(0xFF5A7C5A),
+                                            fontSize: 12,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               ),
                             )
                           : const Padding(
                               padding: EdgeInsets.symmetric(
-                                horizontal: 70,
-                                vertical: 14,
-                              ),
+                                  horizontal: 70, vertical: 14),
                               child: Text(
                                 'Tell me about your day',
                                 style: TextStyle(
-                                  color: Color(0xFF3B5D3B),
-                                  fontSize: 13,
-                                ),
+                                    color: Color(0xFF3B5D3B), fontSize: 13),
                               ),
                             ),
                     ),
@@ -386,16 +491,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   CustomPaint(
                     size: const Size(40, 20),
                     painter: _SpeechBubblePointer(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest,
                     ),
                   ),
                 ],
               ),
             ),
 
-            // Plant of the week
+            // Plant of the week — switches image based on mood
             FutureBuilder<DocumentSnapshot>(
               future: FirebaseFirestore.instance
                   .collection('users')
@@ -410,7 +515,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 }
 
-                final currentPlantId = userSnapshot.data?.get('currentPlantId');
+                final currentPlantId =
+                    userSnapshot.data?.get('currentPlantId');
                 if (currentPlantId == null) {
                   return const SizedBox(
                     width: 200,
@@ -434,9 +540,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
 
                     final plant = plantSnapshot.data!;
-                    final imagePath =
-                        plant['goodImagePath'] ??
-                        'assets/images/plant_sample.png';
+
+                    // Switch image based on current mood
+                    final imagePath = _currentMood == 'sad'
+                        ? (plant['badImagePath'] ??
+                            'assets/images/plant_sample.png')
+                        : (plant['goodImagePath'] ??
+                            'assets/images/plant_sample.png');
 
                     return Column(
                       children: [
@@ -476,7 +586,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 24.0),
+          padding: const EdgeInsets.symmetric(
+              vertical: 10.0, horizontal: 24.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -525,10 +636,8 @@ class _WateringCanIcon extends StatelessWidget {
     return SizedBox(
       width: 60,
       height: 60,
-      child: Image.asset(
-        'assets/icons/wateringCan_icon.png',
-        fit: BoxFit.contain,
-      ),
+      child: Image.asset('assets/icons/wateringCan_icon.png',
+          fit: BoxFit.contain),
     );
   }
 }
@@ -566,7 +675,8 @@ class _plantTable extends StatelessWidget {
         children: [
           Positioned(
             bottom: 0,
-            child: Image.asset('assets/images/table.png', fit: BoxFit.contain),
+            child:
+                Image.asset('assets/images/table.png', fit: BoxFit.contain),
           ),
         ],
       ),

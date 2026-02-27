@@ -193,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'You\'ve already shared your thoughts today. Your plant is happy!',
+              'You\'ve already shared your thoughts today.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 13, color: Color(0xFF5A7C5A)),
             ),

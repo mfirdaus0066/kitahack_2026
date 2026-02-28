@@ -10,6 +10,13 @@ Presented by **Team Shutdown**
 
 **Team Shutdown** is a group of passionate developers committed to leveraging technology for social good. ARNIMA was built as part of our initiative to address mental health challenges through accessible, engaging, and AI-driven solutions.
 
+| Team Members | 
+|---|
+| Muhammad Firdaus bin Mohd Nasri |
+| Muhammad Ariff Izham bin Md Sanusi |
+| Muhammad Arif Naufal bin Nazri |
+| Muhammad Haikal bin Rosmadi |
+
 ---
 
 ## 📌 Project Overview

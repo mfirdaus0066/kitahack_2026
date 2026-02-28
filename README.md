@@ -185,12 +185,13 @@ Given more time and resources, here's what we'd love to add to ARNIMA:
 | 🔔 **Smart Reminders** | Personalized push notifications to remind users to check in when their plant needs care |
 | 🌳 **Garden Expansion** | Multiple plant species, seasonal themes, and decorations to keep the garden experience fresh and motivating |
 | 🤝 **Community Garden** | An opt-in shared garden space where users can support each other anonymously |
+|🎵 **background music** | music and sound effect to enhance user expirience |
 
 ---
 
 ## 📊 Impact & User Feedback
 
-We deployed a prototype and conducted initial user experience testing. Results showed positive reception across all measured categories, with users finding the plant metaphor particularly engaging and the AI responses genuinely supportive.
+We deployed a prototype and conducted initial user experience testing. Results showed positive reception across all measured categories, with users finding the plant metaphor particularly engaging and the AI responses genuinely supportive and some are unsatisfied.
 
 ---
 

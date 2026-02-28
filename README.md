@@ -124,8 +124,8 @@ Flutter UI ──── Render response + Update plant visualization
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/arnima.git
-cd arnima
+git clone https://github.com/mfirdaus0066/kitahack_2026.git
+cd Frontend
 ```
 
 ### 2. Install Dependencies
